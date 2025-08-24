@@ -384,7 +384,8 @@ function Dashboard() {
                     </Card>
                 </div>
             </div>
-
+            
+            {/* recent work */}
             {/* Recent Activities */}
             <div className="mt-5">
                 <p className="text-2xl font-bold text-gray-800 mb-5">

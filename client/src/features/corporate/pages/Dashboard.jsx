@@ -337,7 +337,7 @@ const Dashboard = () => {
                             {data?.total?.count || 0}
                         </p>
                         <h3 className="text-xs sm:text-sm font-semibold text-black tracking-wide">
-                            Total Companies
+                            Total companies
                         </h3>
                     </div>
                     <div className="bg-[rgba(230,222,222,0.3)] rounded-[12px] p-4 sm:p-5 text-center shadow-[0_4px_8px_rgba(0,0,0,0.1)]">

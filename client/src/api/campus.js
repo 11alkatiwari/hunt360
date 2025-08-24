@@ -11,6 +11,7 @@ const buildQueryParams = (filters) => {
     });
     return params.toString();
 };
+//checking api 
 
 export const fetchCollegeCount = async (filters) => {
     const response = await fetch(
