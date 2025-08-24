@@ -8,7 +8,6 @@ import YAML from "yamljs";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import MySQLStoreFactory from "express-mysql-session";
 
 // Import route files
 import authRoutes from "./routes/auth.routes.js";
@@ -54,16 +53,6 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ MySQL Session Store (Production-Ready)
-const MySQLStore = MySQLStoreFactory(session);
-const sessionStore = new MySQLStore({
-  host: process.env.DB_HOST || "localhost",
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASS || "",
-  database: process.env.DB_NAME || "test_db",
-});
-
 app.use(
   session({
     key: "session_cookie_name",
@@ -80,7 +69,7 @@ app.use(
 );
 
 // ✅ Swagger Docs (optional, load only if file exists)
-const swaggerPath = path.resolve(process.cwd(), "docs/endpoints.yaml");
+const swaggerPath = path.resolve(process.cwd(), "public/endpoints.yaml");
 if (fs.existsSync(swaggerPath)) {
   const swaggerDocument = YAML.load(swaggerPath);
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
