@@ -398,7 +398,7 @@ function Dashboard() {
                         <p className="text-red-600">{error}</p>
                     ) : loading ? (
                         <p className="text-gray-500 text-center">
-                            Loading data....
+                            Loading data...
                         </p>
                     ) : rows.length > 0 ? (
                         <div className="w-full overflow-x-auto">
