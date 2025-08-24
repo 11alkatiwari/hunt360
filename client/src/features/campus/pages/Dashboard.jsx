@@ -385,7 +385,7 @@ function Dashboard() {
                 </div>
             </div>
 
-            {/* Recent Activities */}
+            {/* Recent Activitiessss */}
             <div className="mt-5">
                 <p className="text-2xl font-bold text-gray-800 mb-5">
                     Recent Activities
