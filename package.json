@@ -6,7 +6,9 @@
     "scripts": {
         "dev": "nodemon index.js",
         "start": "node index.js",
-        "build": "echo 'No build needed'"
+        "build": "echo 'No build needed'",
+        "test": "echo \"No tests\" && exit 0",
+        "lint": "eslint . --ext .js,.jsx"
     },
     "keywords": [],
     "author": "",
