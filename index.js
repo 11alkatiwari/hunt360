@@ -8,6 +8,7 @@ import YAML from "yamljs";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import MySQLStoreFactory from "express-mysql-session";
 
 // Import route files
 import authRoutes from "./routes/auth.routes.js";
@@ -24,7 +25,7 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Multer (for file uploads)
+// ✅ Multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() });
 
 // ✅ Allowed Origins
@@ -53,6 +54,16 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ✅ MySQL Session Store
+const MySQLStore = MySQLStoreFactory(session);
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+});
+
+// ✅ Session Middleware
 app.use(
   session({
     key: "session_cookie_name",
@@ -61,15 +72,15 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production", // ✅ Secure cookies in production
+      secure: process.env.NODE_ENV === "production", // Only secure cookies in prod
       httpOnly: true,
       sameSite: "lax",
     },
   })
 );
 
-// ✅ Swagger Docs (optional, load only if file exists)
-const swaggerPath = path.resolve(process.cwd(), "public/endpoints.yaml");
+// ✅ Swagger Docs (load if file exists)
+const swaggerPath = path.join(__dirname, "public", "endpoints.yaml");
 if (fs.existsSync(swaggerPath)) {
   const swaggerDocument = YAML.load(swaggerPath);
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
