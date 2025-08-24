@@ -13,7 +13,8 @@
   },
   "plugins": ["react"],
   "rules": {
-    "no-unused-vars": "off",
-    "react/prop-types": "off"
+    "import/no-unresolved": "off",
+    "node/no-missing-import": "off"
   }
+
 }

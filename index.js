@@ -80,7 +80,7 @@ app.use(
 );
 
 // ✅ Swagger Docs (load if file exists)
-const swaggerPath = path.join(__dirname, "public", "endpoints.yaml");
+const swaggerPath = "/endpoints.yaml";
 if (fs.existsSync(swaggerPath)) {
   const swaggerDocument = YAML.load(swaggerPath);
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
