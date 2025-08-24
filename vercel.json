@@ -8,6 +8,7 @@
         "distDir": "dist"
       }
     },
+
     {
       "src": "api/**/*.js",
       "use": "@vercel/node"
@@ -23,6 +24,7 @@
       "dest": "/client/$1"
     }
   ],
+  "outputDirectory": "client/dist",
   "functions": {
     "api/**/*.js": {
       "maxDuration": 30
@@ -32,10 +34,6 @@
     "VITE_API_BASE_URL": "@api_base_url",
     "NODE_ENV": "production",
     "DATABASE_URL": "@database_url",
-    "DB_HOST": "@db_host",
-    "DB_USER": "@db_user",
-    "DB_PASS": "@db_pass",
-    "DB_NAME": "@db_name",
     "SESSION_SECRET": "@session_secret",
     "CLOUDINARY_CLOUD_NAME": "@cloudinary_cloud_name",
     "CLOUDINARY_API_KEY": "@cloudinary_api_key",
