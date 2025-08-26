@@ -10,7 +10,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import MySQLStoreFactory from "express-mysql-session";
 
-// Import route filesssss
+// Import routes
 import authRoutes from "./routes/auth.routes.js";
 import campusRoutes from "./routes/campus.routes.js";
 import corporateRoutes from "./routes/corporate.routes.js";
@@ -20,28 +20,26 @@ import linkedinRoutes from "./routes/linkedin.routes.js";
 import "./utils/warmup.js";
 
 dotenv.config();
-//hghbj
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() });
 
 // ✅ Allowed Origins
 const allowedOrigins = [
-  "http://localhost:3000",
+  "http://localhost:8080",
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://hunt360-5327.vercel.app/ ",
- "https://hunt360new-3371.onrender.com/"
+  "https://hunt360-5327.vercel.app",
+  "https://hunt360new-3371.onrender.com"
 ];
 
 // ✅ Enable CORS
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // Allow mobile apps, curl, etc.
+      if (!origin) return callback(null, true);
       if (!allowedOrigins.includes(origin)) {
         return callback(new Error("CORS policy does not allow this origin"), false);
       }
@@ -62,8 +60,8 @@ const sessionStore = new MySQLStore({
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
   clearExpired: true,
-  checkExpirationInterval: 900000, // Clear expired every 15 min
-  expiration: 86400000, // Session expiry: 1 day
+  checkExpirationInterval: 900000,
+  expiration: 86400000,
 });
 
 // ✅ Session Middleware
@@ -75,21 +73,19 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production", // Only secure cookies in production
+      secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
 
-// ✅ Swagger Docs (if endpoints.yaml exists)
+// ✅ Swagger Docs
 const swaggerPath = path.join(process.cwd(), "public", "endpoints.yaml");
 if (fs.existsSync(swaggerPath)) {
   const swaggerDocument = YAML.load(swaggerPath);
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
-} else {
-  console.warn("⚠️ Swagger file not found, skipping API docs");
 }
 
 // ✅ API Routes
@@ -109,7 +105,3 @@ const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
-
-export default function handler(req, res) {
-  res.status(200).json({ message: "API is working!" });
-}
