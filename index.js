@@ -33,8 +33,8 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://hunt360-one.vercel.app",
-  "https://hunt360new-2a0y.onrender.com",
+  "https://hunt360-t15i.vercel.app"
+  // "https://hunt360new-2a0y.onrender.com",
 ];
 
 // ✅ Enable CORS

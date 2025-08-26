@@ -21,7 +21,7 @@ export default function Login() {
             const result = await login({ identifier: email, password });
 
             if (result.success) {
-                navigate('/dashboard');
+                navigate('https://hunt360-t15i.vercel.app/dashboard');
             } else {
                 setError(result.error);
             }
