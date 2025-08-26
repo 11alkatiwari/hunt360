@@ -25,34 +25,32 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Multer for file uploadsssss
+// ✅ Multer for file uploads
 const upload = multer({ storage: multer.memoryStorage() });
 
-// ✅ Allowed Originssss
+// ✅ Allowed Origins
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://hunt360.vercel.app",
+  process.env.FRONTEND_URL, // ✅ Take frontend URL from .env
   "https://hunt360.onrender.com",
-  "https://hunt360new-2a0y.onrender.com", // Frontend URL
+  "https://hunt360new-2a0y.onrender.com",
 ];
 
 // ✅ Enable CORS
-app.use(cors({ 
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true 
-}));
-
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true); // Allow mobile apps, curl, etc.
+      if (!allowedOrigins.includes(origin)) {
+        return callback(new Error("CORS policy does not allow this origin"), false);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -64,25 +62,29 @@ const sessionStore = new MySQLStore({
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
+  clearExpired: true,
+  checkExpirationInterval: 900000, // Clear expired every 15 min
+  expiration: 86400000, // Session expiry: 1 day
 });
 
 // ✅ Session Middleware
 app.use(
   session({
-    key: "session_cookie_name",
-    secret: process.env.SESSION_SECRET || "ashlokchaudhary",
+    key: "session_id",
+    secret: process.env.SESSION_SECRET || "supersecretkey",
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production", // Only secure cookies in prod
+      secure: process.env.NODE_ENV === "production", // Only secure cookies in production
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
   })
 );
 
-// ✅ Swagger Docs (load if file exists)
+// ✅ Swagger Docs (if endpoints.yaml exists)
 const swaggerPath = path.join(process.cwd(), "public", "endpoints.yaml");
 if (fs.existsSync(swaggerPath)) {
   const swaggerDocument = YAML.load(swaggerPath);
@@ -91,7 +93,7 @@ if (fs.existsSync(swaggerPath)) {
   console.warn("⚠️ Swagger file not found, skipping API docs");
 }
 
-// ✅ Routes
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/campus", campusRoutes);
 app.use("/api/hrhunt", hrhuntRoutes);
