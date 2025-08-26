@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (credentials) => {
         try {
             console.log('Attempting login with:', credentials.identifier);
-            const res = await api.post('/login', credentials);
+            const res = await api.post('https://hunt360new-h3i4.onrender.com/login', credentials);
 
             if (res.data.success) {
                 const { user, token } = res.data;
@@ -79,7 +79,7 @@ export const AuthProvider = ({ children }) => {
     const signup = async (newUser) => {
         try {
             console.log('Attempting signup with:', newUser.email);
-            const res = await api.post('/signup', newUser);
+            const res = await api.post('https://hunt360new-h3i4.onrender.com/signup', newUser);
             
             if (res.data.success) {
                 const { user, token } = res.data;
