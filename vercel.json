@@ -19,19 +19,5 @@
       "src": "/(.*)",
       "dest": "/client/$1"
     }
-  ],
-  "env": {
-    "VITE_API_BASE_URL": "@api_base_url",
-    "NODE_ENV": "production",
-    "DATABASE_URL": "@database_url",
-    "SESSION_SECRET": "@session_secret",
-    "CLOUDINARY_CLOUD_NAME": "@cloudinary_cloud_name",
-    "CLOUDINARY_API_KEY": "@cloudinary_api_key",
-    "CLOUDINARY_API_SECRET": "@cloudinary_api_secret",
-    "EMAIL_HOST": "@email_host",
-    "EMAIL_PORT": "@email_port",
-    "EMAIL_USER": "@email_user",
-    "EMAIL_PASS": "@email_pass",
-    "JWT_SECRET": "@jwt_secret"
-  }
+  ]
 }
