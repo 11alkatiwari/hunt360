@@ -34,7 +34,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   process.env.FRONTEND_URL, // ✅ Take frontend URL from .env
-  "https://hunt360.onrender.com",
+  "https://hunt360-one.vercel.app",
   "https://hunt360new-2a0y.onrender.com",
 ];
 
