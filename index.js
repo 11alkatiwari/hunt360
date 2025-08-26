@@ -110,4 +110,6 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
 
-export default app;
+export default function handler(req, res) {
+  res.status(200).json({ message: "API is working!" });
+}
