@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
     ? `${import.meta.env.VITE_API_BASE_URL}/auth`
-    : 'http://localhost:8080/api/auth';
+    : `${import.meta.env.VITE_API_BASE_URL}/auth`; // Remove localhost reference
 
 const api = axios.create({
     baseURL,

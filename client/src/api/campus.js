@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
     ? `${import.meta.env.VITE_API_BASE_URL}/campus`
-    : 'http://localhost:3000/api/campus';
+    : `${import.meta.env.VITE_API_BASE_URL}/campus`; // Remove localhost reference
 
 const buildQueryParams = (filters) => {
     const params = new URLSearchParams();

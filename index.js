@@ -25,31 +25,34 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Multer for file uploads
+// ✅ Multer for file uploadsssss
 const upload = multer({ storage: multer.memoryStorage() });
 
-// ✅ Allowed Origins
+// ✅ Allowed Originssss
 const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:5174",
   "https://hunt360.vercel.app",
   "https://hunt360.onrender.com",
+  "https://hunt360new-2a0y.onrender.com", // Frontend URL
 ];
 
 // ✅ Enable CORS
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
+app.use(cors({ 
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true 
+}));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
