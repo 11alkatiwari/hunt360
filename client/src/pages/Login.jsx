@@ -21,7 +21,7 @@ export default function Login() {
             const result = await login({ identifier: email, password });
 
             if (result.success) {
-                navigate('https://hunt360-5327.vercel.app/dashboard');
+                navigate('https://hunt360new-h3i4.onrender.com/api/dashboard');
             } else {
                 setError(result.error);
             }
