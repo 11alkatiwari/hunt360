@@ -5,11 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "node index.js",
-    "build": "vite build",
-    "test": "echo \"No tests\" && exit 0",
-    "lint": "eslint . --ext .js,.jsx || exit 0"
+    "start": "react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
   },
   "keywords": [],
   "author": "",
