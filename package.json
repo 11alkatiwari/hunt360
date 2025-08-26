@@ -5,8 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-  "build": "react-scripts build",
+    "start": "node index.js",
+  "build": "react-scripts",
   "test": "react-scripts test",
   "eject": "react-scripts eject"
   },
