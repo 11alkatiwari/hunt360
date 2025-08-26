@@ -33,7 +33,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://localhost:5173",
   "http://localhost:5174",
-"https://hunt360-one.vercel.app/ ",
+  "https://hunt360-5327.vercel.app/ ",
  "https://hunt360new-3371.onrender.com/"
 ];
 
