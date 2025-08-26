@@ -7,6 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Load stored user on first render
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
+  // ✅ Helper to save auth data
   const saveAuthData = (user, token) => {
     localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("token", token);
@@ -32,6 +34,7 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
   };
 
+  // ✅ Login API call
   const login = async (credentials) => {
     try {
       const res = await api.post("/auth/login", credentials);
@@ -53,6 +56,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ✅ Signup API call
   const signup = async (newUser) => {
     try {
       const res = await api.post("/auth/signup", newUser);
@@ -74,6 +78,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // ✅ Logout API call
   const logout = async () => {
     try {
       await api.post("/auth/logout");
