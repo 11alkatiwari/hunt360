@@ -10,7 +10,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import MySQLStoreFactory from "express-mysql-session";
 
-// Import route files
+// Import route filesssss
 import authRoutes from "./routes/auth.routes.js";
 import campusRoutes from "./routes/campus.routes.js";
 import corporateRoutes from "./routes/corporate.routes.js";
@@ -20,7 +20,7 @@ import linkedinRoutes from "./routes/linkedin.routes.js";
 import "./utils/warmup.js";
 
 dotenv.config();
-
+//hghbj
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
