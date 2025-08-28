@@ -12,7 +12,7 @@ const api = axios.create({
   timeout: 10000, // 10-second timeout
 });
 
-// Request Interceptor
+// Request Interceptorjbbubu
 api.interceptors.request.use(
   (config) => {
     console.log(`🔗 Request: ${config.method?.toUpperCase()} ${config.url}`);
