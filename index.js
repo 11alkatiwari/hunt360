@@ -31,7 +31,7 @@ const allowedOrigins = [
   "http://localhost:8080",
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://hunt360-5327.vercel.app",
+  "https://hunt360-kaaq.vercel.app/",
   "https://hunt360new-3371.onrender.com"
 ];
 
