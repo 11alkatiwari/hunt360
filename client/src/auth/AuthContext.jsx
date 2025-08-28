@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Login API call
   const login = async (credentials) => {
     try {
-      const res = await api.post("http://localhost:8080/api/auth/login", credentials);
+      const res = await api.post("https://hunt360new-3371.onrender.com/api/auth/login", credentials);
 
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Signup API call
   const signup = async (newUser) => {
     try {
-      const res = await api.post("http://localhost:8080/api/auth/signup", newUser);
+      const res = await api.post("https://hunt360new-3371.onrender.com/api/auth/signup", newUser);
 
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
