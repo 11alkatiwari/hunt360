@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 2,
   "framework": "vite",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
@@ -13,7 +13,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "client/index.html"
     }
   ],
   "headers": [
