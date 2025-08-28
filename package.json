@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-  "build": "react-scripts",
-  "test": "react-scripts test",
-  "eject": "react-scripts eject"
+    "build": "react-scripts",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
   },
   "keywords": [],
   "author": "",
@@ -31,6 +31,7 @@
     "mysql2": "^3.14.3",
     "nodemailer": "^7.0.3",
     "puppeteer": "^24.17.0",
+    "react-scripts": "^5.0.1",
     "selenium-webdriver": "^4.32.0",
     "swagger-ui-express": "^5.0.1",
     "xlsx": "^0.18.5",
