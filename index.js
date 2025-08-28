@@ -31,15 +31,37 @@ const allowedOrigins = [
   "http://localhost:8080",
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://hunt360-kaaq.vercel.app/",
-  "https://hunt360new-3371.onrender.com"
+  "https://hunt360-kaaq.vercel.app", // ✅ Your Vercel frontend
 ];
 
-// ✅ Enable CORS
-app.use(cors({
-  origin: ["https://<tumhara-vercel-domain>.vercel.app"],
-  credentials: true
-}));
+// ✅ Enable CORS Dynamically
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
+// ✅ CORS Headers Middleware
+app.use((req, res, next) => {
+  res.header(
+    "Access-Control-Allow-Origin",
+    allowedOrigins.includes(req.headers.origin) ? req.headers.origin : allowedOrigins[0]
+  );
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
