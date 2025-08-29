@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Load stored user on first renderjbhj
+  // ✅ Load stored user on first render
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // ✅ Helper to save auth data
+  // ✅ Save auth data
   const saveAuthData = (user, token) => {
     localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("token", token);
@@ -34,11 +34,10 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
   };
 
-  //hvhvb
   // ✅ Login API call
   const login = async (credentials) => {
     try {
-      const res = await api.post("https://hunt360new-3371.onrender.com/auth/login", credentials);
+      const res = await api.post("/auth/login", credentials); // ✅ No hardcoded URL
 
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
@@ -60,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Signup API call
   const signup = async (newUser) => {
     try {
-      const res = await api.post("https://hunt360new-3371.onrender.com/auth/signup", newUser);
+      const res = await api.post("/auth/signup", newUser); // ✅ No hardcoded URL
 
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
