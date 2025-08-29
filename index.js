@@ -25,25 +25,13 @@ const __dirname = path.dirname(__filename);
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// ✅ Allowed Origins
-const allowedOrigins = [
-  "http://localhost:5173",                // local dev
-  "http://localhost:5174",
-  "http://localhost:8080",
-  "https://hunt360-kaaq.vercel.app",      // frontend on vercel
-  "https://hunt360new-3371.onrender.com"  // backend on render
-];
-
-// ✅ CORS Middleware
+/* 
+  🔥 TEMP DEBUG CORS (Allow All Origins)
+  Once confirmed working, restrict `origin` to only your Vercel frontend & localhost.
+*/
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: true, // Allow ALL origins for now
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
