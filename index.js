@@ -31,7 +31,7 @@ const allowedOrigins = [
   "http://localhost:5174",
   "http://localhost:8080",
   "https://hunt360-kaaq.vercel.app",      // frontend on vercel
-    // backend on render
+  "https://hunt360-3.onrender.com"       // backend on render
 ];
 
 // ✅ CORS Middleware
@@ -94,17 +94,11 @@ if (fs.existsSync(swaggerPath)) {
 }
 
 // ✅ API Routes
-console.log("Registering auth routes...");
 app.use("/api/auth", authRoutes);
-console.log("Registering campus routes...");
 app.use("/api/campus", campusRoutes);
-console.log("Registering hrhunt routes...");
 app.use("/api/hrhunt", hrhuntRoutes);
-console.log("Registering corporate routes...");
 app.use("/api/corporate", corporateRoutes);
-console.log("Registering email-service routes...");
 app.use("/api/email-service", emailRoutes);
-console.log("Registering linkedin routes...");
 app.use("/api/linkedin", linkedinRoutes);
 
 // ✅ Health Check
