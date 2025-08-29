@@ -25,23 +25,39 @@ const __dirname = path.dirname(__filename);
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// 🔥 CORS Middleware
+// ✅ Allowed Origins
+const allowedOrigins = [
+  "http://localhost:5173",                // local dev
+  "http://localhost:5174",
+  "http://localhost:8080",
+  "https://hunt360-kaaq.vercel.app",      // frontend on vercel
+    // backend on render
+];
+
+// ✅ CORS Middleware
 app.use(
   cors({
-    origin: true,
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// ✅ Handle Preflight Requests
 app.options("*", cors());
 
-// Body parsing
+// ✅ Body Parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MySQL Session Store
+// ✅ MySQL Session Store
 const MySQLStore = MySQLStoreFactory(session);
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST,
@@ -53,6 +69,7 @@ const sessionStore = new MySQLStore({
   expiration: 86400000,
 });
 
+// ✅ Session Middleware
 app.use(
   session({
     key: "session_id",
@@ -64,40 +81,38 @@ app.use(
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
   })
 );
 
-// Swagger Docs
+// ✅ Swagger Docs
 const swaggerPath = path.join(process.cwd(), "public", "endpoints.yaml");
 if (fs.existsSync(swaggerPath)) {
   const swaggerDocument = YAML.load(swaggerPath);
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 }
 
-// ✅ API Routes (WRAP WITH DEBUG)
-function safeRoute(path, router) {
-  try {
-    app.use(path, router);
-  } catch (err) {
-    console.error(`Failed to load route ${path}:`, err.message);
-  }
-}
+// ✅ API Routes
+console.log("Registering auth routes...");
+app.use("/api/auth", authRoutes);
+console.log("Registering campus routes...");
+app.use("/api/campus", campusRoutes);
+console.log("Registering hrhunt routes...");
+app.use("/api/hrhunt", hrhuntRoutes);
+console.log("Registering corporate routes...");
+app.use("/api/corporate", corporateRoutes);
+console.log("Registering email-service routes...");
+app.use("/api/email-service", emailRoutes);
+console.log("Registering linkedin routes...");
+app.use("/api/linkedin", linkedinRoutes);
 
-safeRoute("/api/auth", authRoutes);
-safeRoute("/api/campus", campusRoutes);
-safeRoute("/api/hrhunt", hrhuntRoutes);
-safeRoute("/api/corporate", corporateRoutes);
-safeRoute("/api/email-service", emailRoutes);
-safeRoute("/api/linkedin", linkedinRoutes);
-
-// Health Check
+// ✅ Health Check
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-// Start Server
+// ✅ Start Server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);

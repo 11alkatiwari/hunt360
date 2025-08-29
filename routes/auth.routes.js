@@ -5,6 +5,7 @@ import { loginSchema, signUpSchema } from '../validation/auth.schema.js';
 
 const router = Router();
 
+// Use POST for signup/login
 router.post('/signup', validate(signUpSchema), signUp);
 router.post('/login', validate(loginSchema), login);
 

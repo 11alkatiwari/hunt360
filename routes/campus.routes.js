@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import multer from 'multer';
 import {
     addCollege,
     deleteCollege,
@@ -33,19 +34,15 @@ import {
     getTotalColleges,
     getTotalPayment
 } from '../controllers/marketing.controller.js';
-import multer from 'multer';
 
 const router = Router();
 
 const upload = multer({
     storage: multer.memoryStorage(),
-    limits: {
-        fileSize: 5 * 1024 * 1024,
-        files: 1
-    }
-})
+    limits: { fileSize: 5 * 1024 * 1024, files: 1 }
+});
 
-/* College Routes */
+// ✅ College Routes
 router.post('/upload', upload.single('file'), uploadFile);
 router.post('/scrape', scrapeData);
 router.get('/open-file', openFile);
@@ -59,25 +56,25 @@ router.get('/payment-received', getPaymentReceived);
 router.get('/chart-data', getChartData);
 router.post('/add-college', addCollege);
 
-/* Marketing Routes */
+// ✅ Marketing Routes
 router.get('/total-clg', getTotalColleges);
 router.get('/total-payment', getTotalPayment);
-router.get('/marketing_chart', getMarketingChart);
+router.get('/marketing-chart', getMarketingChart);
 
-/* HR Routes */
-router.get('/totalcollege', getTotalColleges);
-router.get('/totalhired', getTotalHired);
-router.get('/totalstudents', getTotalStudents);
+// ✅ HR Routes
+router.get('/total-colleges', getTotalColleges);
+router.get('/total-hired', getTotalHired);
+router.get('/total-students', getTotalStudents);
 router.get('/hr-chart', getHrChart);
 
-/* Dashboard Routes */
+// ✅ Dashboard Routes
 router.get('/distinct', getDistinctFiles);
 router.get('/hiring-clg', getHiringColleges);
 router.get('/hiring-clg-consultant', getHiringCollegesConsultant);
 router.get('/total-scraped', getTotalScraped);
 router.get('/last-5-rows', getLastFiveRows);
-router.get('/mteam-chart', getMarketingTeamChart);
-router.get('/hrteam-chart', getHrTeamChart);
+router.get('/marketing-team-chart', getMarketingTeamChart);
+router.get('/hr-team-chart', getHrTeamChart);
 router.get('/course-college', getCourseCollege);
 
 export default router;
