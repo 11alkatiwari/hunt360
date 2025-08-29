@@ -34,10 +34,10 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(true);
   };
 
-  // ✅ Login API call
+  // ✅ Login API callsghs
   const login = async (credentials) => {
     try {
-    const res = await api.post("/auth/login", credentials); // ✅ FIXED
+    const res = await api.post("/auth/login", credentials); 
 
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
