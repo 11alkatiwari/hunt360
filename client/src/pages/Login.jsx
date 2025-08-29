@@ -21,7 +21,7 @@ export default function Login() {
             const result = await login({ identifier: email, password });
 
             if (result.success) {
-                navigate('https://hunt360-3.onrender.com/api/dashboard');
+                navigate('/dashboard');
             } else {
                 setError(result.error);
             }
