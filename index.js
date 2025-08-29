@@ -30,14 +30,14 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:8080",
-  "https://hunt360-kaaq.vercel.app",
-  "https://hunt360new-3371.onrender.com"
+  "https://hunt360-kaaq.vercel.app", // ✅ FRONTEND
+  "https://hunt360new-3371.onrender.com" // ✅ BACKEND
 ];
 
-// ✅ CORS Middleware
+// ✅ Fix CORS
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -87,7 +87,7 @@ if (fs.existsSync(swaggerPath)) {
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 }
 
-// ✅ API Routes
+// ✅ API Routes (Correct Prefix!)
 app.use("/api/auth", authRoutes);
 app.use("/api/campus", campusRoutes);
 app.use("/api/hrhunt", hrhuntRoutes);
@@ -95,7 +95,6 @@ app.use("/api/corporate", corporateRoutes);
 app.use("/api/email-service", emailRoutes);
 app.use("/api/linkedin", linkedinRoutes);
 
-// ✅ Health Check
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });

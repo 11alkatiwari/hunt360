@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Login API call
   const login = async (credentials) => {
     try {
-      const res = await api.post("/auth/login", credentials); // ✅ No hardcoded URL
+      const res = await api.post("/auth/login", credentials);
 
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
@@ -59,8 +59,8 @@ export const AuthProvider = ({ children }) => {
   // ✅ Signup API call
   const signup = async (newUser) => {
     try {
-      const res = await api.post("/auth/signup", newUser); // ✅ No hardcoded URL
-
+      const res = await api.post("/auth/login", credentials);
+      
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
         return { success: true };
