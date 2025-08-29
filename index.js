@@ -10,7 +10,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import MySQLStoreFactory from "express-mysql-session";
 
-// Import routes
 import authRoutes from "./routes/auth.routes.js";
 import campusRoutes from "./routes/campus.routes.js";
 import corporateRoutes from "./routes/corporate.routes.js";
@@ -28,10 +27,11 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // ✅ Allowed Origins
 const allowedOrigins = [
-  "http://localhost:8080",
   "http://localhost:5173",
   "http://localhost:5174",
-  "https://hunt360-kaaq.vercel.app", // ✅ Your frontend URL
+  "http://localhost:8080",
+  "https://hunt360-kaaq.vercel.app",
+  "https://hunt360new-3371.onrender.com"
 ];
 
 // ✅ CORS Middleware
@@ -47,19 +47,6 @@ app.use(
     credentials: true,
   })
 );
-
-// ✅ Ensure headers are added
-app.use((req, res, next) => {
-  const origin = allowedOrigins.includes(req.headers.origin)
-    ? req.headers.origin
-    : allowedOrigins[0];
-  res.header("Access-Control-Allow-Origin", origin);
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  if (req.method === "OPTIONS") return res.sendStatus(200);
-  next();
-});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
