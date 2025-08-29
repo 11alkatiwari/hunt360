@@ -25,27 +25,23 @@ const __dirname = path.dirname(__filename);
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-/* 
-  🔥 TEMP DEBUG CORS (Allow All Origins)
-  Once confirmed working, restrict `origin` to only your Vercel frontend & localhost.
-*/
+// 🔥 CORS Middleware
 app.use(
   cors({
-    origin: true, // Allow ALL origins for now
+    origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-// ✅ Handle Preflight Requests
 app.options("*", cors());
 
-// ✅ Body Parsing
+// Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ MySQL Session Store
+// MySQL Session Store
 const MySQLStore = MySQLStoreFactory(session);
 const sessionStore = new MySQLStore({
   host: process.env.DB_HOST,
@@ -57,7 +53,6 @@ const sessionStore = new MySQLStore({
   expiration: 86400000,
 });
 
-// ✅ Session Middleware
 app.use(
   session({
     key: "session_id",
@@ -69,32 +64,40 @@ app.use(
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: 1000 * 60 * 60 * 24,
     },
   })
 );
 
-// ✅ Swagger Docs
+// Swagger Docs
 const swaggerPath = path.join(process.cwd(), "public", "endpoints.yaml");
 if (fs.existsSync(swaggerPath)) {
   const swaggerDocument = YAML.load(swaggerPath);
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 }
 
-// ✅ API Routes
-app.use("/api/auth", authRoutes);
-app.use("/api/campus", campusRoutes);
-app.use("/api/hrhunt", hrhuntRoutes);
-app.use("/api/corporate", corporateRoutes);
-app.use("/api/email-service", emailRoutes);
-app.use("/api/linkedin", linkedinRoutes);
+// ✅ API Routes (WRAP WITH DEBUG)
+function safeRoute(path, router) {
+  try {
+    app.use(path, router);
+  } catch (err) {
+    console.error(`Failed to load route ${path}:`, err.message);
+  }
+}
 
-// ✅ Health Check
+safeRoute("/api/auth", authRoutes);
+safeRoute("/api/campus", campusRoutes);
+safeRoute("/api/hrhunt", hrhuntRoutes);
+safeRoute("/api/corporate", corporateRoutes);
+safeRoute("/api/email-service", emailRoutes);
+safeRoute("/api/linkedin", linkedinRoutes);
+
+// Health Check
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-// ✅ Start Server
+// Start Server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
