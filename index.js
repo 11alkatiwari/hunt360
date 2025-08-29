@@ -27,17 +27,17 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 // ✅ Allowed Origins
 const allowedOrigins = [
-  "http://localhost:5173",
+  "http://localhost:5173",                // local dev
   "http://localhost:5174",
   "http://localhost:8080",
-  "https://hunt360-kaaq.vercel.app", // ✅ FRONTEND
-  "https://hunt360new-3371.onrender.com" // ✅ BACKEND
+  "https://hunt360-kaaq.vercel.app",      // frontend on vercel
+  "https://hunt360new-3371.onrender.com"  // backend on render
 ];
 
-// ✅ Fix CORS
+// ✅ CORS Middleware
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -45,9 +45,15 @@ app.use(
       }
     },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
+// ✅ Handle Preflight Requests
+app.options("*", cors());
+
+// ✅ Body Parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -75,7 +81,7 @@ app.use(
       secure: process.env.NODE_ENV === "production",
       httpOnly: true,
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
     },
   })
 );
@@ -87,7 +93,7 @@ if (fs.existsSync(swaggerPath)) {
   app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 }
 
-// ✅ API Routes (Correct Prefix!)
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/campus", campusRoutes);
 app.use("/api/hrhunt", hrhuntRoutes);
@@ -95,10 +101,12 @@ app.use("/api/corporate", corporateRoutes);
 app.use("/api/email-service", emailRoutes);
 app.use("/api/linkedin", linkedinRoutes);
 
+// ✅ Health Check
 app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
+// ✅ Start Server
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
