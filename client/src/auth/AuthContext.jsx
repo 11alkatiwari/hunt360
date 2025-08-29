@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Login API callsghs
   const login = async (credentials) => {
     try {
-    const res = await api.post("/auth/login", credentials); 
+    const res = await api.post("https://hunt360-3.onrender.com/api/auth/login", credentials); 
 
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Signup API call
   const signup = async (newUser) => {
     try {
-    const res = await api.post("/auth/signup", newUser); // ✅ FIXED
+    const res = await api.post("https://hunt360-3.onrender.com/api/auth/signup", newUser); // ✅ FIXED
       
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
