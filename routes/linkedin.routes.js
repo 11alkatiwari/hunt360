@@ -44,4 +44,30 @@ router.get('/analytics', getAnalytics);
 router.post('/reports', getReports);
 router.post('/add-profile', addProfile);
 
+// ✅ Welcome endpoint with request logging
+router.get('/welcome', (req, res) => {
+  const { method, originalUrl, headers, ip } = req;
+  
+  // Log request metadata
+  console.log('📋 Request received:', {
+    timestamp: new Date().toISOString(),
+    method,
+    path: originalUrl,
+    ip,
+    userAgent: headers['user-agent'],
+    contentType: headers['content-type']
+  });
+
+  res.json({
+    message: 'Welcome to the LinkedIn API Service!',
+    timestamp: new Date().toISOString(),
+    requestInfo: {
+      method,
+      path: originalUrl,
+      ip,
+      userAgent: headers['user-agent']
+    }
+  });
+});
+
 export default router;

@@ -3,9 +3,7 @@ import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
-  ? `${import.meta.env.VITE_API_BASE_URL}/linkedin`
-  : 'http://localhost:3000/api/linkedin';
+const baseURL = 'https://hunt360-3.onrender.com/api/linkedin';
 
 
 const FinalProfile = () => {

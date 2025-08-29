@@ -8,9 +8,7 @@ import bgLogo from "../../../public/logo.png";
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
-  ? `${import.meta.env.VITE_API_BASE_URL}/linkedin`
-  : 'http://localhost:3000/api/linkedin';
+const baseURL = 'https://hunt360-3.onrender.com/api/linkedin';
 
 const Dashboard = () => {
   const [data, setData] = useState({});

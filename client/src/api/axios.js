@@ -44,7 +44,6 @@ api.interceptors.response.use(
           localStorage.removeItem("user");
           window.location.href = "/login"; // Optional: Replace with React Router navigate
           window.location.href = "/signup"; // Optional: Replace with React Router navigate
-
           break;
         case 404:
           error.message = "Requested resource not found.";
