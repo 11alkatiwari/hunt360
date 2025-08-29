@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Login API call
   const login = async (credentials) => {
     try {
-      const res = await api.post("/auth/login", credentials);
+    const res = await api.post("/auth/login", credentials); // ✅ FIXED
 
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Signup API call
   const signup = async (newUser) => {
     try {
-      const res = await api.post("/auth/signup", credentials);
+    const res = await api.post("/auth/signup", newUser); // ✅ FIXED
       
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
