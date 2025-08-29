@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   // ✅ Signup API call
   const signup = async (newUser) => {
     try {
-      const res = await api.post("/auth/login", credentials);
+      const res = await api.post("/auth/signup", credentials);
       
       if (res.data.success) {
         saveAuthData(res.data.user, res.data.token);
