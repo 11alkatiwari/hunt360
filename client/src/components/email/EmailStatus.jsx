@@ -3,7 +3,7 @@ import 'toastify-js/src/toastify.css';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
     ? `${import.meta.env.VITE_API_BASE_URL}/email-service`
-    : 'http://localhost:3000/api/email-service';
+    : 'https://hunt360-3.onrender.com/api/auth/email-service';
 
 const EmailStatus = () => {
     const [emailData, setEmailData] = useState([]);

@@ -153,7 +153,7 @@ const courseOptions = [
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
     ? `${import.meta.env.VITE_API_BASE_URL}/campus`
-    : 'http://localhost:3000/api/campus';
+    : 'https://hunt360-3.onrender.com/api/campus';
 
 
 const SingleDataEdit = () => {

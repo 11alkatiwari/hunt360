@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
     ? `${import.meta.env.VITE_API_BASE_URL}/hrhunt`
-    : 'http://localhost:3000/api/hrhunt';
+    : 'https://hunt360-3.onrender.com/api/hrhunt';
 
 const purple = '#a000c8';
 const darkPurple = '#8a00c2';

@@ -6,7 +6,7 @@ import { FaEdit, FaEye, FaTrash } from 'react-icons/fa';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
     ? `${import.meta.env.VITE_API_BASE_URL}/corporate`
-    : 'http://localhost:3000/api/corporate';
+    : 'https://hunt360-3.onrender.com/api/corporate';
 
 
 const MarketingData = () => {

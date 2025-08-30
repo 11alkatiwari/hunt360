@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
   ? `${import.meta.env.VITE_API_BASE_URL}/hrhunt`
-  : 'http://localhost:3000/api/hrhunt';
+  : 'https://hunt360-3.onrender.com/api/hrhunt';
 
 const Overlay = styled.div`
   position: fixed;
