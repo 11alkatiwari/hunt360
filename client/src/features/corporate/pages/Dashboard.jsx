@@ -20,7 +20,7 @@ const COLORS = ['#0088FE', '#FF8042'];
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
     ? `${import.meta.env.VITE_API_BASE_URL}/corporate`
-    : 'https://hunt360-3.onrender.com/api/corporate';
+    : '/corporate';
 
 ChartJS.register(
     ArcElement,
