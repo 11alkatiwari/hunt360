@@ -34,16 +34,23 @@ const allowedOrigins = [
   "https://hunt360-3.onrender.com"       // backend on render
 ];
 
-// 🔥 Allow All Origins for Testing
+// ✅ CORS Middleware
 app.use(
   cors({
-    origin: "*", // Allow ALL domains
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: false, // Must be false when using "*"
   })
 );
 
+// ✅ Handle Preflight Requests
 app.options("*", cors());
 
 // ✅ Body Parsing
