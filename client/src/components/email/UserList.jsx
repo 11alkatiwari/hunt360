@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import 'toastify-js/src/toastify.css';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
-    ? `${import.meta.env.VITE_API_BASE_URL}/email-service`
-    : 'https://hunt360-3.onrender.com/api/email-service';
+const baseURL = 'https://hunt360-3.onrender.com/api/email-service';
 
 const UserList = () => {
     const [users, setUsers] = useState([]);
