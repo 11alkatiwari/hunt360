@@ -4,7 +4,7 @@ import Toastify from 'toastify-js';
 import 'toastify-js/src/toastify.css';
 import Papa from 'papaparse';
 
-const baseURL = 'https://hunt360-3.onrender.com/api/email-service';
+const baseURL = "https://hunt360-3.onrender.com/api/email-service";
 
 const SendEmail = () => {
     const [formData, setFormData] = useState({

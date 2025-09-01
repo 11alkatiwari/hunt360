@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import 'toastify-js/src/toastify.css';
 
-const baseURL = 'https://hunt360-3.onrender.com/api/email-service';
+const baseURL = "https://hunt360-3.onrender.com/api/email-service";
 
 const EmailStatus = () => {
     const [emailData, setEmailData] = useState([]);
