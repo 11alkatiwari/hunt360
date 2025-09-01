@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
-    ? `${import.meta.env.VITE_API_BASE_URL}/corporate`
-    : 'https://hunt360-3.onrender.com/api/auth/corporate';
+const baseURL = 'https://hunt360-3.onrender.com/api/corporate';
 
 const BulkDataCleaning = () => {
     const [file, setFile] = useState(null);

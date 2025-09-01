@@ -7,9 +7,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useEffect, useRef, useState } from 'react';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
-    ? `${import.meta.env.VITE_API_BASE_URL}/corporate`
-    : 'https://hunt360-3.onrender.com/api/corporate';
+const baseURL = 'https://hunt360-3.onrender.com/api/corporate';
 
 function Reports() {
     const leadStatusChartRef = useRef(null);
