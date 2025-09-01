@@ -49,7 +49,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
+// ✅ Handle Preflight Requests
 app.options("*", cors());
 
 // ✅ Body Parsing

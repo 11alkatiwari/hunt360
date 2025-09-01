@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
     ? `${import.meta.env.VITE_API_BASE_URL}/campus`
-    : `${import.meta.env.VITE_API_BASE_URL}/campus`; // Remove localhost reference
+    : "https://hunt360-3.onrender.com/api/campus";
 
 const buildQueryParams = (filters) => {
     const params = new URLSearchParams();
@@ -45,7 +45,7 @@ export const fetchTotalPlacedCandidates = async (filters) => {
 
 export const fetchTotalHired = async (filters) => {
     const response = await fetch(
-        `${API_BASE_URL}/totalhired?${buildQueryParams(filters)}`
+        `${API_BASE_URL}/total-hired?${buildQueryParams(filters)}`
     );
     if (!response.ok) throw new Error('Failed to fetch total hired');
     return response.json();
@@ -58,12 +58,12 @@ export const fetchLastFiveRows = async () => {
 };
 
 export const fetchMteamChart = async () => {
-    const response = await axios.get(`${API_BASE_URL}/mteam-chart`);
+    const response = await axios.get(`${API_BASE_URL}/marketing-team-chart`);
     return response.data;
 };
 
 export const fetchHrteamChart = async () => {
-    const response = await axios.get(`${API_BASE_URL}/hrteam-chart`);
+    const response = await axios.get(`${API_BASE_URL}/hr-team-chart`);
     return response.data;
 };
 
