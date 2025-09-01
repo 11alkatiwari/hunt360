@@ -4,7 +4,7 @@ import Toastify from 'toastify-js';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL
     ? `${import.meta.env.VITE_API_BASE_URL}/email-service`
-    : 'https://hunt360-3.onrender.com/api/auth/email-service';
+    : 'https://hunt360-3.onrender.com/api/email-service';
 
 const EmailHistory = () => {
     const [emails, setEmails] = useState([]);
