@@ -14,10 +14,13 @@ const buildQueryParams = (filters) => {
 //checking api 
 
 export const fetchCollegeCount = async (filters) => {
-    const response = await fetch(
-        `${API_BASE_URL}/college-count?${buildQueryParams(filters)}`
-    );
-    if (!response.ok) throw new Error('Failed to fetch college count');
+    const url = `${API_BASE_URL}/college-count?${buildQueryParams(filters)}`;
+    console.log('Fetching college count from:', url);
+    const response = await fetch(url);
+    if (!response.ok) {
+        console.error('Failed to fetch college count:', response.status, response.statusText);
+        throw new Error('Failed to fetch college count');
+    }
     return response.json();
 };
 
