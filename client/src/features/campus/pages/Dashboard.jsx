@@ -16,14 +16,6 @@ import * as apiService from '../../../api/campus.js';
 import Card from '../../../components/campus/Card';
 import InsertForm from '../forms/InsertForm.jsx';
 
-const initialData = [
-    { name: 'Colleges', value: 2000 },
-    { name: 'Scraped', value: 5 },
-    { name: 'Contacted', value: 1000 },
-    { name: 'Students', value: 500 },
-    { name: 'Placed', value: 100 },
-];
-
 // Custom hook for current time
 const useCurrentTime = () => {
     const [currentTime, setCurrentTime] = useState(new Date());
@@ -385,7 +377,7 @@ function Dashboard() {
                 </div>
             </div>
 
-            {/* Recent Activitiessss */}
+            {/* Recent Activities */}
             <div className="mt-5">
                 <p className="text-2xl font-bold text-gray-800 mb-5">
                     Recent Activities
@@ -569,7 +561,6 @@ function Dashboard() {
                     </div>
                 )}
             </div>
-
         </div>
     );
 }

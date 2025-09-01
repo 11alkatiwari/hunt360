@@ -5,9 +5,7 @@ import SingleEditForm from '../forms/SingleEditForm';
 import Card from "../../../components/campus/Card";
 import MarketingForm from '../forms/MarketingForm';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
-  ? `${import.meta.env.VITE_API_BASE_URL}/campus`
-  : 'https://hunt360-3.onrender.com/api/campus';
+const API_BASE_URL = "https://hunt360-3.onrender.com/api/campus";
 
 const locationOptions = [
   { value: 'Mumbai', label: 'Mumbai' },

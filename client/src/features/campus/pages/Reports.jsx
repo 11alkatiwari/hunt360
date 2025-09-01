@@ -18,9 +18,7 @@ Chart.register(...registerables);
 ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 
-const baseURL = import.meta.env.VITE_API_BASE_URL
-    ? `${import.meta.env.VITE_API_BASE_URL}/campus`
-    : 'https://hunt360-3.onrender.com/api/campus';
+const API_BASE_URL = "https://hunt360-3.onrender.com/api/campus";
 
 const Reports = () => {
     const [activeTab, setActiveTab] = useState('college');

@@ -33,7 +33,7 @@ const useScrapingForm = () => {
         'Nagaland',
         'Odisha',
         'Punjab',
-        'Rajasthan',
+        'Rajasgotra',
         'Sikkim',
         'Tamil Nadu',
         'Telangana',
@@ -75,7 +75,7 @@ const useScrapingForm = () => {
         Manipur: ['Imphal'],
         Nagaland: ['Kohima', 'Dimapur'],
         Sikkim: ['Gangtok'],
-        'Andaman and Nicobar Islands': ['Port Blair', 'South Andmans'],
+        'Andaman and Nicobar Islands': ['Port Blair', 'South Andamans'],
         Puducherry: ['Puducherry', 'Karaikal'],
         Ladakh: ['Leh', 'Kargil'],
         'Jammu and Kashmir': ['Srinagar', 'Jammu'],
@@ -174,8 +174,7 @@ const useScrapingLogic = ({
                 site: selectedSite,
                 state: customState,
                 city: customCity,
-                stream:
-                    selectedSite === 'College Dunia' ? customStream : undefined,
+                stream: selectedSite === 'College Dunia' ? customStream : undefined,
             });
             setScrapedData(data.results || []);
             if (data.fileName) setFinalFile(data.fileName);
