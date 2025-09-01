@@ -1,8 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-    ? `${import.meta.env.VITE_API_BASE_URL}/campus`
-    : "https://hunt360-3.onrender.com/api/campus";
+const API_BASE_URL = "https://hunt360-3.onrender.com/api/campus";
 
 const buildQueryParams = (filters) => {
     const params = new URLSearchParams();
