@@ -6,39 +6,60 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 export const uploadFile = [
-    upload.single('file'),
-    async (req, res) => {
-        if (!req.file) {
-            return res.status(400).json({ error: "No file uploaded" });
-        }
+  upload.single('file'),
+  async (req, res) => {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
 
         try {
-            const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
-            const sheetName = workbook.SheetNames[0];
-            const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
-            if (sheetData.length === 0) {
-                return res.status(400).json({ error: "Empty file uploaded" });
-            }
+      if (sheetData.length === 0) {
+        return res.status(400).json({ message: "Empty file uploaded" });
+      }
 
-            const insertQuery = "INSERT INTO scraped_data (company_name, location, address, phone_number, website_link, job_title, gst_number, post_date) VALUES ?";
-            const values = sheetData.map((row) => [
-                row["Company_Name"] || "",
-                row.Location ? row.Location.split(",")[0].trim() : "",
-                row["Address"] || "",
-                row["Phone"] || "",
-                row["Website"] || "",
-                row["Job_Title"] || "",
-                row["GST Number(s)"] ? row["GST Number(s)"].split(",")[0].trim() : "",
-                row["Post Date"] || "",
-            ]);
+const insertQuery = `
+        INSERT INTO scraped_data (
+          company_name, location, address, phone_number, website_link, job_title, gst_number, post_date
+        ) VALUES ?
+      `;
+
+      const parseDate = (dateStr) => {
+        if (!dateStr || dateStr === "") return null;
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
+      };
+
+      const values = sheetData.map((row) => [
+        row["Company_Name"] || null,
+        row.Location ? row.Location.split(",")[0].trim() : null,
+        row["Address"] || null,
+        row["Phone"] || null,
+        row["Website"] || null,
+        row["Job_Title"] || null,
+        row["GST Number(s)"] ? row["GST Number(s)"].split(",")[0].trim() : null,
+        parseDate(row["Post Date"]),
+      ]);
+
 
             const [result] = await db.query(insertQuery, [values]);
-            res.json({ message: `Uploaded ${result.affectedRows} records successfully` });
-        } catch (error) {
-            console.error("Error processing file:", error);
-            return res.status(500).json({ error: "Failed to process the uploaded file" });
-        }
+      return res.json({
+        message: `Uploaded ${result.affectedRows} records successfully`,
+      }); } catch (error) {
+      console.error("Error processing file:", error);
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        code: error.code,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        sqlMessage: error.sqlMessage
+      });
+      return res.status(500).json({ message: "Failed to process the uploaded file", error: error.message });
+    }
     },
 ];
 
@@ -243,10 +264,14 @@ export const saveForm = async (req, res) => {
             return res.status(400).json({ error: "Missing company ID" });
         }
 
-        let formattedMeetingDate = meeting_date;
-        if (meeting_date) {
-            formattedMeetingDate = new Date(meeting_date).toISOString().split("T")[0];
-        }
+        const parseDate = (dateStr) => {
+            if (!dateStr || dateStr === "") return null;
+            const date = new Date(dateStr);
+            return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
+        };
+
+        let formattedMeetingDate = parseDate(meeting_date);
+        let formattedPostDate = parseDate(post_date);
 
         const updateQuery = `
         UPDATE scraped_data SET
@@ -261,7 +286,7 @@ export const saveForm = async (req, res) => {
         const values = [
             company_name, contact_person_name, mobile, email, location, state, country,
             pincode, gst_number, bd_name, phone_number, industry, sub_industry, website_link,
-            updated, communication_status, notes, formattedMeetingDate, lead_status, post_date, address, id
+            updated, communication_status, notes, formattedMeetingDate, lead_status, formattedPostDate, address, id
         ];
 
         const [result] = await db.query(updateQuery, values);
@@ -300,13 +325,19 @@ export const addCompany = async (req, res) => {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
+    const parseDate = (dateStr) => {
+        if (!dateStr || dateStr === "") return null;
+        const date = new Date(dateStr);
+        return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
+    };
+
     const insertQuery = `
       INSERT INTO scraped_data
       (company_name, location, address, phone_number, website_link, job_title, gst_number, updated, created_at, updated_at, post_date)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'no', NOW(), NOW(), ?)
     `;
 
-    const values = [company_name, location, address, phone_number, website_link, job_title, gst_number, post_date];
+    const values = [company_name, location, address, phone_number, website_link, job_title, gst_number, parseDate(post_date)];
 
     try {
         const [result] = await db.query(insertQuery, values);

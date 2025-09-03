@@ -23,27 +23,35 @@ const BulkDataCleaning = () => {
 
     const handleUpload = async () => {
         if (!file) {
-            alert('Please select a file to upload.');
+            alert("Please select a file to upload.");
             return;
         }
 
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append("file", file);
 
         try {
             const response = await fetch(`${baseURL}/upload`, {
-                method: 'POST',
-                body: formData,
+                method: "POST",
+                body: formData
             });
 
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
             const result = await response.json();
+            if (result.error) {
+                throw new Error(result.error);
+            }
+
             alert(result.message);
-            fetchStats();
+            await fetchStats();
             setFile(null);
-            document.getElementById('fileInput').value = '';
+            document.getElementById("fileInput").value = "";
         } catch (error) {
-            console.error('Upload error:', error);
-            alert('Error uploading file.');
+            console.error("Upload error:", error.message);
+            alert(`Error uploading file: ${error.message}`);
         }
     };
 

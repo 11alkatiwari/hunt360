@@ -693,7 +693,7 @@ const SingleDataEdit = () => {
                     <div className="bg-[#f4eaff] p-4 rounded-[15px] w-full sm:w-[500px] max-w-[95%] max-h-[90vh] overflow-y-auto shadow-lg">
                         <div className="flex justify-between items-center mb-3">
                             <h2 className="text-[#5e2ca5] text-xl font-bold">
-                                {selectedCompany?.id ? "Edit College" : "Add New College"}
+                                {selectedCompany?.id ? "Edit College" : "Add New Company"}
                             </h2>
                             <span
                                 className="text-xl font-bold cursor-pointer"
@@ -708,7 +708,7 @@ const SingleDataEdit = () => {
                             {/* Company Name */}
                             <input
                                 type="text"
-                                placeholder="College Name"
+                                placeholder="Company Name"
                                 value={selectedCompany?.company_name || ""}
                                 onChange={(e) =>
                                     setSelectedCompany((prev) => ({
