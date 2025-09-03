@@ -18,8 +18,7 @@ export const uploadFile = async (req, res) => {
             return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        const filePath = req.file.path;
-        const workbook = xlsx.readFile(filePath, { type: 'buffer' });
+        const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
         const sheetName = workbook.SheetNames[0];
         const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
