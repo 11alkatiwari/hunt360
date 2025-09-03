@@ -43,9 +43,12 @@ const BulkEditing = () => {
 
   // Track file selected for upload
   const handleNewFileChange = (event) => {
-    const file = event.target.files[0];
-    setSelectedFile(file || null);
-  };
+  const file = event.target.files[0];
+  if (file) {
+    console.log('Selected file:', file.name); // Debug
+  }
+  setSelectedFile(file || null);
+};
 
   // Detect missing values in dataset
   const detectMissingValues = (dataset) => {
