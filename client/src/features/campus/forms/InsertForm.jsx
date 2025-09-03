@@ -6,7 +6,7 @@ const useInsertForm = ({ onClose, onAddRow }) => {
         College_Name: '',
         District: '',
         State: '',
-        Annual_fees: '',
+        Anual_fees: '',
         Placement_fees: '',
         Ranking: '',
         Course: '',
@@ -23,8 +23,8 @@ const useInsertForm = ({ onClose, onAddRow }) => {
             newErrors.College_Name = 'College name is required';
         if (!formData.District.trim()) newErrors.District = 'City is required';
         if (!formData.State.trim()) newErrors.State = 'State is required';
-        if (formData.Annual_fees && isNaN(formData.Annual_fees))
-            newErrors.Annual_fees = 'Annual fees must be a number';
+        if (formData.Anual_fees && isNaN(formData.Anual_fees))
+            newErrors.Anual_fees = 'Annual fees must be a number';
         if (formData.Placement_fees && isNaN(formData.Placement_fees))
             newErrors.Placement_fees = 'Placement fees must be a number';
         if (formData.Ranking && isNaN(formData.Ranking))
@@ -59,7 +59,7 @@ const useInsertForm = ({ onClose, onAddRow }) => {
                 College_Name: '',
                 District: '',
                 State: '',
-                Annual_fees: '',
+                Anual_fees: '',
                 Placement_fees: '',
                 Ranking: '',
                 Course: '',
@@ -182,28 +182,28 @@ const InsertForm = ({ onClose, onAddRow }) => {
                     </div>
 
                     <div>
-                        <label htmlFor="Annual_fees" className={labelClass}>
+                        <label htmlFor="Anual_fees" className={labelClass}>
                             Annual Fees
                         </label>
                         <input
-                            id="Annual_fees"
+                            id="Anual_fees"
                             type="text"
-                            name="Annual_fees"
+                            name="Anual_fees"
                             placeholder="Enter annual fees"
                             className={inputClass}
-                            value={formData.Annual_fees}
+                            value={formData.Anual_fees}
                             onChange={handleChange}
                             disabled={isSubmitting}
-                            aria-invalid={!!errors.Annual_fees}
+                            aria-invalid={!!errors.Anual_fees}
                             aria-describedby={
-                                errors.Annual_fees
-                                    ? 'Annual_fees-error'
+                                errors.Anual_fees
+                                    ? 'Anual_fees-error'
                                     : undefined
                             }
                         />
-                        {errors.Annual_fees && (
-                            <p id="Annual_fees-error" className={errorClass}>
-                                {errors.Annual_fees}
+                        {errors.Anual_fees && (
+                            <p id="Anual_fees-error" className={errorClass}>
+                                {errors.Anual_fees}
                             </p>
                         )}
                     </div>
@@ -334,7 +334,7 @@ const InsertForm = ({ onClose, onAddRow }) => {
                     onClick={handleInsert}
                     disabled={isSubmitting}
                 >
-                    {isSubmitting ? 'Submitting...' : 'Insert'}
+                    Insert
                 </button>
                 <button
                     className="bg-gray-400 text-white font-medium px-6 py-2 rounded-xl hover:bg-gray-500 transition duration-200 disabled:bg-gray-300"
