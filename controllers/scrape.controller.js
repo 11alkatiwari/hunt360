@@ -81,7 +81,17 @@ export const scrape = (req, res) => {
 
     const nodeProcess = spawn('node', [scriptPath, trimmedIndustry, trimmedCity]);
     let scrapedData = '';
+    let errorData = '';
     let responded = false;
+
+    // Set a timeout for the process
+    const timeout = setTimeout(() => {
+        if (!responded) {
+            responded = true;
+            nodeProcess.kill();
+            res.status(500).json({ error: 'Scraping process timed out.' });
+        }
+    }, 300000); // 5 minutes timeout
 
     nodeProcess.stdout.on('data', (data) => {
         scrapedData += data.toString();
@@ -89,15 +99,22 @@ export const scrape = (req, res) => {
     });
 
     nodeProcess.stderr.on('data', (data) => {
+        errorData += data.toString();
         console.error(`Node Error: ${data.toString()}`);
     });
 
     nodeProcess.on('close', async (code) => {
+        clearTimeout(timeout);
+        console.log(`Node script exited with code ${code}`);
         if (responded) return;
 
         if (!scrapedData.trim()) {
             responded = true;
-            return res.status(500).json({ error: 'No data scraped.' });
+            return res.status(500).json({
+                error: 'No data scraped.',
+                exitCode: code,
+                stderr: errorData
+            });
         }
 
         const rows = scrapedData

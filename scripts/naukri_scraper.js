@@ -1,4 +1,4 @@
-import { Builder, By, Key, until } from 'selenium-webdriver';
+import puppeteer from 'puppeteer';
 import fs from 'fs-extra';
 import path from 'path';
 import xlsx from 'xlsx';
@@ -25,15 +25,10 @@ function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function closeAds(driver) {
+async function closeAds(page) {
     try {
-        let closeBtn = await driver.wait(
-            until.elementLocated(
-                By.xpath("//span[contains(@class, 'ns-') and text()='Close']")
-            ),
-            5000
-        );
-        await closeBtn.click();
+        await page.waitForSelector("span[class*='ns-']:has-text('Close')", { timeout: 5000 });
+        await page.click("span[class*='ns-']:has-text('Close')");
         console.log('[INFO] Closed popup ad (Type 1).');
         await delay(1000);
     } catch {
@@ -41,11 +36,8 @@ async function closeAds(driver) {
     }
 
     try {
-        let dismissBtn = await driver.wait(
-            until.elementLocated(By.xpath("//div[@id='dismiss-button']")),
-            5000
-        );
-        await dismissBtn.click();
+        await page.waitForSelector("#dismiss-button", { timeout: 5000 });
+        await page.click("#dismiss-button");
         console.log('[INFO] Closed popup ad (Type 2).');
         await delay(1000);
     } catch {
@@ -53,36 +45,28 @@ async function closeAds(driver) {
     }
 }
 
-async function getGSTNumbers(driver, companyName, location) {
+async function getGSTNumbers(browser, companyName, location) {
     let gstNumbers = [];
+    let page;
     try {
-        await driver.executeScript("window.open('');");
-        await driver.switchTo().window((await driver.getAllWindowHandles())[1]);
-        await driver.get('https://findgst.in/gstin-by-name');
+        page = await browser.newPage();
+        await page.goto('https://findgst.in/gstin-by-name');
 
         await delay(2000);
-        await closeAds(driver);
+        await closeAds(page);
 
-        let searchInput = await driver.wait(
-            until.elementLocated(By.id('gstnumber')),
-            10000
-        );
-        await searchInput.clear();
-        await searchInput.sendKeys(companyName);
-        await driver
-            .findElement(By.xpath("//input[@value='Find GST number']"))
-            .click();
+        await page.waitForSelector('#gstnumber', { timeout: 10000 });
+        await page.type('#gstnumber', companyName);
+        await page.click("input[value='Find GST number']");
         await delay(5000);
-        await driver.executeScript('window.scrollBy(0, 800);');
+        await page.evaluate(() => window.scrollBy(0, 800));
         await delay(2000);
 
-        let results = await driver.findElements(
-            By.xpath(
-                "//p[contains(@class, 'yellow') and contains(@class, 'lighten-5')]"
-            )
+        const results = await page.$$eval(
+            "p.yellow.lighten-5",
+            elements => elements.map(el => el.textContent)
         );
-        for (let block of results) {
-            let text = await block.getText();
+        for (let text of results) {
             let matches = text.match(
                 /\b\d{2}[A-Z0-9]{10}[1-9A-Z]{1}Z[0-9A-Z]{1}\b/g
             );
@@ -91,80 +75,37 @@ async function getGSTNumbers(driver, companyName, location) {
     } catch (e) {
         console.log(`[GST] Error for ${companyName}: ${e}`);
     } finally {
-        if ((await driver.getAllWindowHandles()).length > 1) {
-            await driver.close();
-            await driver
-                .switchTo()
-                .window((await driver.getAllWindowHandles())[0]);
-            await delay(1000);
-        }
+        if (page) await page.close();
     }
     return [...new Set(gstNumbers)];
 }
 
-async function getGoogleMapsData(driver, companyName, location) {
+async function getGoogleMapsData(browser, companyName, location) {
+    let page;
     try {
-        await driver.executeScript("window.open('');");
-        await driver.switchTo().window((await driver.getAllWindowHandles())[1]);
-        await driver.get(
+        page = await browser.newPage();
+        await page.goto(
             `https://www.google.com/maps/search/${encodeURIComponent(
                 companyName
             )} ${encodeURIComponent(location)}`
         );
 
         try {
-            await driver.wait(
-                until.elementLocated(
-                    By.xpath("//h1[@class='DUwDvf lfPIob']")
-                ),
-                15000
-            );
+            await page.waitForSelector("h1.DUwDvf.lfPIob", { timeout: 15000 });
         } catch {
             try {
-                let firstResult = await driver.wait(
-                    until.elementLocated(
-                        By.xpath("(//a[contains(@href, '/place/')])[1]")
-                    ),
-                    15000
-                );
-                await driver.executeScript(
-                    'arguments[0].click();',
-                    firstResult
-                );
-                await driver.wait(
-                    until.elementLocated(
-                        By.xpath("//h1[@class='DUwDvf lfPIob']")
-                    ),
-                    15000
-                );
+                await page.waitForSelector("a[href*='/place/']", { timeout: 15000 });
+                await page.click("a[href*='/place/']");
+                await page.waitForSelector("h1.DUwDvf.lfPIob", { timeout: 15000 });
             } catch {
                 throw new Error('No results found');
             }
         }
 
-        let name = await driver
-            .findElement(By.xpath("//h1[@class='DUwDvf lfPIob']"))
-            .getText();
-        let address = await driver
-            .findElement(
-                By.xpath(
-                    "//div[contains(@class,'Io6YTe') and contains(@class, 'fontBodyMedium')]"
-                )
-            )
-            .getText()
-            .catch(() => 'N/A');
-        let website = await driver
-            .findElement(By.xpath("//a[contains(@aria-label, 'Website')]"))
-            .getAttribute('href')
-            .catch(() => 'N/A');
-        let phone = await driver
-            .findElement(
-                By.xpath(
-                    "//div[starts-with(text(), '0') and contains(@class, 'Io6YTe')]"
-                )
-            )
-            .getText()
-            .catch(() => 'N/A');
+        const name = await page.$eval("h1.DUwDvf.lfPIob", el => el.textContent).catch(() => companyName);
+        const address = await page.$eval("div.Io6YTe.fontBodyMedium", el => el.textContent).catch(() => 'N/A');
+        const website = await page.$eval("a[aria-label*='Website']", el => el.href).catch(() => 'N/A');
+        const phone = await page.$eval("div.Io6YTe:has-text(/^0/)", el => el.textContent).catch(() => 'N/A');
 
         return {
             Company_Name: name || companyName,
@@ -181,9 +122,7 @@ async function getGoogleMapsData(driver, companyName, location) {
             Website: 'N/A',
         };
     } finally {
-        await driver.close();
-        await driver.switchTo().window((await driver.getAllWindowHandles())[0]);
-        await delay(2000);
+        if (page) await page.close();
     }
 }
 
@@ -253,7 +192,19 @@ async function saveData(filePath) {
 }
 
 (async function main() {
-    let driver = await new Builder().forBrowser('chrome').build();
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ]
+    });
 
     const industry = process.argv[2] || 'IT Services';
     const city = process.argv[3] || 'Mumbai';
@@ -261,77 +212,47 @@ async function saveData(filePath) {
     const filePath = getUniquexlsxPath(fileName);
 
     try {
-        await driver.get(
-            'https://www.naukri.com/nlogin/login?URL=https://www.naukri.com/mnjuser/homepage'
+        const page = await browser.newPage();
+        await page.goto(
+            'https://www.naukri.com/nlogin/login?URL=https://www.naukri.com/mnjuser/homepage',
+            { waitUntil: 'networkidle2' }
         );
-        await driver.wait(until.elementLocated(By.tagName('body')), 15000);
         await delay(5000);
 
-        await driver.executeScript(`
+        await page.evaluate(() => {
             let overlays = document.querySelectorAll('.nI-gNb-sb__placeholder');
             overlays.forEach(el => el.remove());
-        `);
+        });
 
-        let searchInput = await driver.findElement(By.css('.suggestor-input'));
-        await driver.executeScript('arguments[0].click();', searchInput);
-        await searchInput.sendKeys(`${industry}, ${city}`);
-        await driver
-            .findElement(By.className('nI-gNb-sb__icon-wrapper'))
-            .click();
+        await page.waitForSelector('.suggestor-input', { timeout: 10000 });
+        await page.click('.suggestor-input');
+        await page.type('.suggestor-input', `${industry}, ${city}`);
+        await page.click('.nI-gNb-sb__icon-wrapper');
         await delay(5000);
 
         let noMorePages = false;
 
         while (!interrupted && !noMorePages) {
-            await driver.executeScript(
-                'window.scrollBy(0, document.body.scrollHeight);'
-            );
+            await page.evaluate(() => window.scrollBy(0, document.body.scrollHeight));
             await delay(3000);
 
-            let jobs = await driver.findElements(By.css('a.title'));
-            let companies = await driver.findElements(
-                By.css('div.row2 span a.comp-name')
-            );
-            let locations = await driver.findElements(
-                By.css('div.row3 span.loc-wrap span.loc span.locWdth')
-            );
+            const jobs = await page.$$eval('a.title', elements => elements.map(el => el.textContent || 'N/A'));
+            const companies = await page.$$eval('div.row2 span a.comp-name', elements => elements.map(el => el.textContent || 'N/A'));
+            const locations = await page.$$eval('div.row3 span.loc-wrap span.loc span.locWdth', elements => elements.map(el => el.textContent || 'N/A'));
 
-            for (
-                let i = 0;
-                i < Math.min(companies.length, locations.length);
-                i++
-            ) {
-                let jobTitle = await jobs[i].getText().catch(() => 'N/A');
-                let companyName = await companies[i]
-                    .getText()
-                    .catch(() => 'N/A');
-                let location = await locations[i]
-                    .getText()
-                    .catch(() => 'N/A');
-                let shortLocation = location.split(',')[0].trim();
+            for (let i = 0; i < Math.min(companies.length, locations.length); i++) {
+                const jobTitle = jobs[i] || 'N/A';
+                const companyName = companies[i] || 'N/A';
+                const location = locations[i] || 'N/A';
+                const shortLocation = location.split(',')[0].trim();
 
-                if (
-                    !data.some(
-                        (d) =>
-                            d['Company_Name'] === companyName &&
-                            d['Location'] === shortLocation
-                    )
-                ) {
-                    const mapsInfo = await getGoogleMapsData(
-                        driver,
-                        companyName,
-                        shortLocation
-                    );
-                    const gstNumbers = await getGSTNumbers(
-                        driver,
-                        companyName,
-                        shortLocation
-                    );
+                if (!data.some(d => d['Company_Name'] === companyName && d['Location'] === shortLocation)) {
+                    const mapsInfo = await getGoogleMapsData(browser, companyName, shortLocation);
+                    const gstNumbers = await getGSTNumbers(browser, companyName, shortLocation);
                     let gstToSave = 'N/A';
 
                     if (gstNumbers.length > 0) {
-                        gstTracker[companyName] =
-                            gstTracker[companyName] || new Set();
+                        gstTracker[companyName] = gstTracker[companyName] || new Set();
                         for (let gst of gstNumbers) {
                             if (!gstTracker[companyName].has(gst)) {
                                 gstToSave = gst;
@@ -341,7 +262,7 @@ async function saveData(filePath) {
                         }
                     }
 
-                    let record = {
+                    const record = {
                         Job_Title: jobTitle,
                         Company_Name: companyName,
                         Location: shortLocation,
@@ -357,16 +278,8 @@ async function saveData(filePath) {
             }
 
             try {
-                let nextButton = await driver.wait(
-                    until.elementLocated(
-                        By.xpath("//a[span[text()='Next']]")
-                    ),
-                    10000
-                );
-                await driver.executeScript(
-                    'arguments[0].click();',
-                    nextButton
-                );
+                await page.waitForSelector("a span:has-text('Next')", { timeout: 10000 });
+                await page.click("a span:has-text('Next')");
                 await delay(3000);
             } catch {
                 console.log('No more pages.');
@@ -374,7 +287,7 @@ async function saveData(filePath) {
             }
         }
     } finally {
-        await driver.quit();
+        await browser.close();
         console.log('Browser closed.');
         await saveData(filePath);
         console.log(`Final data saved in: ${filePath}`);

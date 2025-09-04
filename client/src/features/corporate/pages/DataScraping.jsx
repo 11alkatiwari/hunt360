@@ -70,12 +70,19 @@ const DataScraping = () => {
             ]);
             if (response.data.fileName) setFinalFile(response.data.fileName);
         } catch (error) {
-            console.error('❌ Scraping Error:', error.response?.data?.error || error.message);
+            const errorData = error.response?.data;
+            console.error('❌ Scraping Error:', errorData?.error || error.message);
+            if (errorData?.exitCode !== undefined) {
+                console.error('Exit Code:', errorData.exitCode);
+            }
+            if (errorData?.stderr) {
+                console.error('Stderr:', errorData.stderr);
+            }
             setLogs((prevLogs) => [
                 ...prevLogs,
-                '❌ Error occurred while scraping.',
+                `❌ Error occurred while scraping: ${errorData?.error || error.message}`,
             ]);
-            alert('Error occurred while scraping. Please try again.');
+            alert(`Error occurred while scraping: ${errorData?.error || error.message}`);
         }
 
         setIsScraping(false);
