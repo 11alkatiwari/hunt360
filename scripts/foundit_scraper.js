@@ -1,14 +1,13 @@
-import { Builder, By, until } from 'selenium-webdriver';
-import fs from 'fs';
+import puppeteer from 'puppeteer';
+import fs from 'fs-extra';
 import path from 'path';
-import XLSX from 'xlsx';
-import os from 'os';
+import xlsx from 'xlsx';
 import mysql from 'mysql2/promise';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// ----------------------------- CLI & Global Setup ----------------------------- //
+
 if (process.argv.length !== 4) {
     console.log('Usage: node script.js <industry> <city>');
     process.exit(1);
@@ -19,20 +18,12 @@ const city = process.argv[3];
 const data = [];
 const gstTracker = {};
 
-// Get the system's Downloads folder path (for Windows, macOS, Linux)
 const downloadsFolder = path.join(__dirname, 'exports');
 if (!fs.existsSync(downloadsFolder)) fs.mkdirSync(downloadsFolder);
-
-// Ensure the Downloads directory exists
-if (!fs.existsSync(downloadsFolder)) {
-    console.error('Error: Downloads directory not found.');
-    process.exit(1);
-}
 
 const baseFileName = `${industry}_${city}_Foundit.xlsx`;
 let filePath = path.join(downloadsFolder, baseFileName);
 
-// Check if file exists and increment filename if necessary
 let fileIndex = 1;
 while (fs.existsSync(filePath)) {
     filePath = path.join(
@@ -42,7 +33,6 @@ while (fs.existsSync(filePath)) {
     fileIndex++;
 }
 
-// Database connection configuration
 let ca;
 try {
     ca = fs.readFileSync(path.join(__dirname, '..', 'certs', 'ca.pem'));
@@ -51,7 +41,6 @@ try {
     process.exit(1);
 }
 
-// Database configuration
 const dbConfig = {
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -94,9 +83,8 @@ async function saveDataToDatabase() {
     }
 }
 
-// ----------------------------- Save Data to Excel ----------------------------- //
 async function saveData() {
-    await saveDataToDatabase(); // Save to database first
+    await saveDataToDatabase();
     if (data.length > 0) {
         const headers = [
             'Job_Title',
@@ -108,7 +96,6 @@ async function saveData() {
             'GST Number(s)',
         ];
 
-        // Create a 2D array with the correct column order
         const rows = data.map((d) => [
             d['Job_Title'],
             d['Company_Name'],
@@ -119,33 +106,39 @@ async function saveData() {
             d['GST Number(s)'],
         ]);
         const worksheetData = [headers, ...rows];
-        const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-        // const ws = XLSX.utils.json_to_sheet(data);
-        const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Foundit Data');
-        XLSX.writeFile(wb, filePath);
+        const ws = xlsx.utils.aoa_to_sheet(worksheetData);
+        const wb = xlsx.utils.book_new();
+        xlsx.utils.book_append_sheet(wb, ws, 'Foundit Data');
+        xlsx.writeFile(wb, filePath);
         console.log(`Data saved. Records: ${data.length}`);
         console.log(`Saved to: ${filePath}`);
     }
 }
 
-// ----------------------------- Main Scraping Function ----------------------------- //
 async function scrapeData() {
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ]
+    });
+
     try {
-        await driver.get('https://www.foundit.in/');
-        await driver.wait(until.elementLocated(By.tagName('body')), 10000);
+        const page = await browser.newPage();
+        await page.goto('https://www.foundit.in/', { waitUntil: 'networkidle2' });
 
-        const searchInput = await driver.findElement(
-            By.id('heroSectionDesktop-skillsAutoComplete--input')
-        );
-        await searchInput.clear();
-        await searchInput.sendKeys(`${industry}, ${city}`);
+        await page.waitForSelector('#heroSectionDesktop-skillsAutoComplete--input', { timeout: 10000 });
+        await page.type('#heroSectionDesktop-skillsAutoComplete--input', `${industry}, ${city}`);
 
-        const searchBtn = await driver.findElement(
-            By.xpath("//button[span[text()='Search']]")
-        );
-        await searchBtn.click();
-        await driver.sleep(5000);
+        await page.click("button:has-text('Search')");
+        await page.waitForTimeout(5000);
 
         let interrupted = false;
         process.on('SIGINT', () => {
@@ -154,38 +147,18 @@ async function scrapeData() {
         });
 
         while (!interrupted) {
-            await driver.wait(
-                until.elementLocated(By.css('div.jobTitle')),
-                10000
-            );
+            await page.waitForSelector('div.jobTitle', { timeout: 10000 });
 
-            const jobTitles = await driver.findElements(By.css('div.jobTitle'));
-            const companies = await driver.findElements(
-                By.xpath(
-                    "//div[contains(@class, 'infoSection')]//div[contains(@class, 'companyName')]/p"
-                )
-            );
-            const locations = await driver.findElements(
-                By.css('div.details.location')
-            );
+            const jobTitles = await page.$$eval('div.jobTitle', els => els.map(el => el.textContent || 'N/A'));
+            const companies = await page.$$eval("div.infoSection div.companyName p", els => els.map(el => el.textContent || 'N/A'));
+            const locations = await page.$$eval('div.details.location', els => els.map(el => el.textContent || 'N/A'));
 
-            for (
-                let i = 0;
-                i <
-                Math.min(jobTitles.length, companies.length, locations.length);
-                i++
-            ) {
-                const jobTitle = await jobTitles[i].getText();
-                const company = await companies[i].getText();
-                const location = await locations[i].getText();
+            for (let i = 0; i < Math.min(jobTitles.length, companies.length, locations.length); i++) {
+                const jobTitle = jobTitles[i];
+                const company = companies[i];
+                const location = locations[i];
 
-                if (
-                    !data.some(
-                        (d) =>
-                            d['Company_Name'] === company &&
-                            d['Location'] === location
-                    )
-                ) {
+                if (!data.some(d => d['Company_Name'] === company && d['Location'] === location)) {
                     const gmapInfo = await getGoogleMapsData(company, location);
                     const gstNumbers = await getGstNumbers(company, location);
 
@@ -210,20 +183,20 @@ async function scrapeData() {
                     gmapInfo['GST Number(s)'] = gstToSave;
 
                     data.push(gmapInfo);
-                    console.log(
-                        `[SCRAPED] ${jobTitle} | ${company} | ${location} | GST: ${gstToSave}`
-                    );
+                    console.log(`[SCRAPED] ${jobTitle} | ${company} | ${location} | GST: ${gstToSave}`);
                 }
             }
 
-            saveData();
+            await saveData();
 
             try {
-                const nextBtn = await driver.findElement(
-                    By.css('div.arrow.arrow-right')
-                );
+                const nextBtn = await page.$('div.arrow.arrow-right');
+                if (!nextBtn) {
+                    console.log('No more pages.');
+                    break;
+                }
                 await nextBtn.click();
-                await driver.sleep(4000);
+                await page.waitForTimeout(4000);
             } catch (err) {
                 console.log('No more pages.');
                 break;
@@ -232,138 +205,112 @@ async function scrapeData() {
     } catch (err) {
         console.error(`Error occurred: ${err}`);
     } finally {
-        await driver.quit();
-        saveData();
+        await browser.close();
+        await saveData();
         console.log('Scraping completed.');
     }
 }
 
-// ----------------------------- Helper Functions ----------------------------- //
 async function getGoogleMapsData(company, location) {
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ]
+    });
+    let page;
     try {
-        await driver.executeScript("window.open('');");
-        const tabs = await driver.getAllWindowHandles();
-        await driver.switchTo().window(tabs[1]);
-
-        await driver.get(
-            `https://www.google.com/maps/search/${company} ${location}`
-        );
-        await driver.sleep(5000);
+        page = await browser.newPage();
+        await page.goto(`https://www.google.com/maps/search/${encodeURIComponent(company)} ${encodeURIComponent(location)}`);
 
         try {
-            // Check if detail view (h1) is already available
-            await driver.wait(
-                until.elementLocated(By.css('h1.DUwDvf.lfPIob')),
-                5000
-            );
+            await page.waitForSelector('h1.DUwDvf.lfPIob', { timeout: 15000 });
         } catch {
-            // If not, try clicking the first result
             try {
-                const firstResult = await driver.wait(
-                    until.elementLocated(
-                        By.xpath("(//a[contains(@href, '/place/')])[1]")
-                    ),
-                    5000
-                );
-                await firstResult.click();
-                await driver.sleep(3000);
-                await driver.wait(
-                    until.elementLocated(By.css('h1.DUwDvf.lfPIob')),
-                    10000
-                );
-            } catch (err) {
-                throw new Error('No results found to click.');
+                await page.waitForSelector("a[href*='/place/']", { timeout: 15000 });
+                await page.click("a[href*='/place/']");
+                await page.waitForSelector('h1.DUwDvf.lfPIob', { timeout: 15000 });
+            } catch {
+                throw new Error('No results found');
             }
         }
 
-        const name = await driver
-            .findElement(By.css('h1.DUwDvf.lfPIob'))
-            .getText();
-        const address = await driver
-            .findElement(By.css('div.Io6YTe.fontBodyMedium'))
-            .getText()
-            .catch(() => 'N/A');
-        const website = await driver
-            .findElement(By.xpath("//a[contains(@aria-label, 'Website')]"))
-            .getAttribute('href')
-            .catch(() => 'N/A');
-        const phone = await driver
-            .findElement(
-                By.xpath(
-                    "//span[contains(text(),'Phone')]/following-sibling::span"
-                )
-            )
-            .getText()
-            .catch(() => 'N/A');
+        const name = await page.$eval('h1.DUwDvf.lfPIob', el => el.textContent).catch(() => company);
+        const address = await page.$eval('div.Io6YTe.fontBodyMedium', el => el.textContent).catch(() => 'N/A');
+        const website = await page.$eval("a[aria-label*='Website']", el => el.href).catch(() => 'N/A');
+        const phone = await page.$eval("div.Io6YTe:has-text(/^0/)", el => el.textContent).catch(() => 'N/A');
 
         return {
-            // "Company Name": name || company,
-            Address: address || 'N/A',
-            Phone: phone || 'N/A',
-            Website: website || 'N/A',
+            Company_Name: name || company,
+            Address: address,
+            Phone: phone,
+            Website: website,
         };
     } catch (err) {
         console.error(`[Google Maps] Error for ${company}: ${err}`);
         return {
-            // "Company Name": company,
+            Company_Name: company,
             Address: 'N/A',
             Phone: 'N/A',
             Website: 'N/A',
         };
     } finally {
-        const tabs = await driver.getAllWindowHandles();
-        await driver.close();
-        await driver.switchTo().window(tabs[0]);
+        if (page) await page.close();
+        if (browser) await browser.close();
     }
 }
 
 async function getGstNumbers(company, location) {
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ]
+    });
+    let page;
     try {
-        await driver.executeScript("window.open('');");
-        await driver.switchTo().window((await driver.getAllWindowHandles())[1]);
+        page = await browser.newPage();
+        await page.goto('https://findgst.in/gstin-by-name');
+        await page.waitForTimeout(2000);
 
-        await driver.get('https://findgst.in/gstin-by-name');
-        await driver.sleep(2000);
+        await page.waitForSelector('#gstnumber', { timeout: 10000 });
+        await page.type('#gstnumber', company);
 
-        const searchInput = await driver.findElement(By.id('gstnumber'));
-        await searchInput.clear();
-        await searchInput.sendKeys(company);
+        await page.click("input[value='Find GST number']");
+        await page.waitForTimeout(3000);
 
-        const findBtn = await driver.findElement(
-            By.xpath("//input[@value='Find GST number']")
+        const results = await page.$$eval(
+            "p.yellow.lighten-5",
+            elements => elements.map(el => el.textContent)
         );
-        await findBtn.click();
-        await driver.sleep(3000);
 
-        const gstElements = await driver.findElements(
-            By.xpath(
-                "//p[contains(@class, 'yellow') and contains(@class, 'lighten-5')]"
-            )
-        );
-        const gstNumbers = [];
-        for (let el of gstElements) {
-            const text = await el.getText();
-            const matches = text.match(
-                /\b\d{2}[A-Z0-9]{10}[1-9A-Z]{1}Z[0-9A-Z]{1}\b/g
-            );
-            if (matches) {
-                gstNumbers.push(...matches);
-            }
+        let gstNumbers = [];
+        for (let text of results) {
+            let matches = text.match(/\b\d{2}[A-Z0-9]{10}[1-9A-Z]{1}Z[0-9A-Z]{1}\b/g);
+            if (matches) gstNumbers.push(...matches);
         }
-
         return gstNumbers;
     } catch (err) {
         console.error(`[GST] Error for ${company}: ${err}`);
         return [];
     } finally {
-        const allHandles = await driver.getAllWindowHandles();
-        await driver.close();
-        await driver.switchTo().window(allHandles[0]);
+        if (page) await page.close();
+        if (browser) await browser.close();
     }
 }
 
-// ----------------------------- Browser Setup ----------------------------- //
-const driver = new Builder().forBrowser('chrome').build();
-
-// ----------------------------- Start Scraping ----------------------------- //
-scrapeData();
+// Start scraping

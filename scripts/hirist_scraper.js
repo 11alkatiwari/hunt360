@@ -1,4 +1,4 @@
-import { Builder, By, Key, until } from 'selenium-webdriver';
+import puppeteer from 'puppeteer';
 import fs from 'fs-extra';
 import path from 'path';
 import xlsx from 'xlsx';
@@ -52,7 +52,19 @@ async function saveData(filePath) {
 }
 
 (async function main() {
-    let driver = await new Builder().forBrowser('chrome').build();
+    const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--no-first-run',
+            '--no-zygote',
+            '--single-process',
+            '--disable-gpu'
+        ]
+    });
 
     const industry = process.argv[2] || 'IT Services';
     const city = process.argv[3] || 'Bangalore';
@@ -60,29 +72,29 @@ async function saveData(filePath) {
     const filePath = getUniquexlsxPath(fileName);
 
     try {
-        await driver.get('https://www.hirist.com/');
-        await driver.wait(until.elementLocated(By.tagName('body')), 15000);
+        const page = await browser.newPage();
+        await page.goto('https://www.hirist.com/', { waitUntil: 'networkidle2' });
         await delay(3000);
 
         // Search for jobs
-        let searchInput = await driver.findElement(By.id('keyword'));
-        await searchInput.sendKeys(industry);
-        
-        let locationInput = await driver.findElement(By.id('location'));
-        await locationInput.sendKeys(city);
-        
-        await driver.findElement(By.css('.search-btn')).click();
+        await page.waitForSelector('#keyword', { timeout: 10000 });
+        await page.type('#keyword', industry);
+
+        await page.waitForSelector('#location', { timeout: 10000 });
+        await page.type('#location', city);
+
+        await page.click('.search-btn');
         await delay(5000);
 
-        let jobs = await driver.findElements(By.css('.job-list'));
-        
+        const jobs = await page.$$('.job-list');
+
         for (let job of jobs) {
             try {
-                let jobTitle = await job.findElement(By.css('.job-title')).getText();
-                let companyName = await job.findElement(By.css('.company-name')).getText();
-                let location = await job.findElement(By.css('.location')).getText();
-                
-                let record = {
+                const jobTitle = await job.$eval('.job-title', el => el.textContent || 'N/A');
+                const companyName = await job.$eval('.company-name', el => el.textContent || 'N/A');
+                const location = await job.$eval('.location', el => el.textContent || 'N/A');
+
+                const record = {
                     Job_Title: jobTitle,
                     Company_Name: companyName,
                     Location: location,
@@ -100,7 +112,7 @@ async function saveData(filePath) {
         }
 
     } finally {
-        await driver.quit();
+        await browser.close();
         console.log('Browser closed.');
         await saveData(filePath);
         console.log(`Final data saved in: ${filePath}`);

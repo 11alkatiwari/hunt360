@@ -1,11 +1,9 @@
-import { Builder, By, Key, until } from 'selenium-webdriver';
-import fs from 'fs';
+import puppeteer from 'puppeteer';
+import fs from 'fs-extra';
 import path from 'path';
-import XLSX from 'xlsx';
+import xlsx from 'xlsx';
 import mysql from 'mysql2/promise';
 import { fileURLToPath } from 'url';
-import chrome from 'selenium-webdriver/chrome.js';
-import chromedriver from 'chromedriver';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -102,146 +100,105 @@ export async function saveDataToDatabase() {
     }
 }
 
-export async function closeAds(driver) {
+async function closeAds(page) {
     try {
-        const closeBtn = await driver.wait(
-            until.elementLocated(
-                By.xpath("//span[contains(@class, 'ns-') and text()='Close']")
-            ),
-            5000
-        );
-        await closeBtn.click();
-        await driver.sleep(1000);
-    } catch (e) {}
+        await page.waitForSelector("span[class*='ns-']:has-text('Close')", { timeout: 5000 });
+        await page.click("span[class*='ns-']:has-text('Close')");
+        console.log('[INFO] Closed popup ad (Type 1).');
+        await delay(1000);
+    } catch {
+        console.log('[INFO] Type 1 popup not found.');
+    }
+
     try {
-        const dismissBtn = await driver.wait(
-            until.elementLocated(By.xpath("//div[@id='dismiss-button']")),
-            5000
-        );
-        await dismissBtn.click();
-        await driver.sleep(1000);
-    } catch (e) {}
+        await page.waitForSelector("#dismiss-button", { timeout: 5000 });
+        await page.click("#dismiss-button");
+        console.log('[INFO] Closed popup ad (Type 2).');
+        await delay(1000);
+    } catch {
+        console.log('[INFO] Type 2 popup not found.');
+    }
 }
 
-export async function getGST(driver, companyName, location) {
+async function getGSTNumbers(browser, companyName, location) {
     let gstNumbers = [];
+    let page;
     try {
-        await driver.executeScript("window.open('');");
-        let tabs = await driver.getAllWindowHandles();
-        await driver.switchTo().window(tabs[1]);
-        await driver.get('https://findgst.in/gstin-by-name');
+        page = await browser.newPage();
+        await page.goto('https://findgst.in/gstin-by-name');
 
-        await driver.sleep(2000);
-        await closeAds(driver);
+        await delay(2000);
+        await closeAds(page);
 
-        const input = await driver.wait(
-            until.elementLocated(By.id('gstnumber')),
-            10000
+        await page.waitForSelector('#gstnumber', { timeout: 10000 });
+        await page.type('#gstnumber', companyName);
+        await page.click("input[value='Find GST number']");
+        await delay(5000);
+        await page.evaluate(() => window.scrollBy(0, 800));
+        await delay(2000);
+
+        const results = await page.$$eval(
+            "p.yellow.lighten-5",
+            elements => elements.map(el => el.textContent)
         );
-        await input.clear();
-        await input.sendKeys(companyName);
-
-        const btn = await driver.findElement(
-            By.xpath("//input[@value='Find GST number']")
-        );
-        await btn.click();
-
-        await driver.sleep(5000);
-        await driver.executeScript('window.scrollBy(0, 800);');
-
-        const resultBlocks = await driver.findElements(
-            By.xpath(
-                "//p[contains(@class, 'yellow') and contains(@class, 'lighten-5')]"
-            )
-        );
-        for (let block of resultBlocks) {
-            let text = await block.getText();
+        for (let text of results) {
             let matches = text.match(
                 /\b\d{2}[A-Z0-9]{10}[1-9A-Z]{1}Z[0-9A-Z]{1}\b/g
             );
             if (matches) gstNumbers.push(...matches);
         }
     } catch (e) {
-        console.log(`[GST] Error: ${companyName} | ${e}`);
+        console.log(`[GST] Error for ${companyName}: ${e}`);
     } finally {
-        let tabs = await driver.getAllWindowHandles();
-        if (tabs.length > 1) {
-            await driver.close();
-            await driver.switchTo().window(tabs[0]);
-        }
+        if (page) await page.close();
     }
     return [...new Set(gstNumbers)];
 }
 
-export async function getMapData(driver, company, location) {
-    let data = {
-        company,
-        address: 'N/A',
-        phone: 'N/A',
-        website: 'N/A',
-    };
+async function getGoogleMapsData(browser, companyName, location) {
+    let page;
     try {
-        await driver.executeScript("window.open('');");
-        let tabs = await driver.getAllWindowHandles();
-        await driver.switchTo().window(tabs[1]);
-        await driver.get(
-            `https://www.google.com/maps/search/${company} ${location}`
+        page = await browser.newPage();
+        await page.goto(
+            `https://www.google.com/maps/search/${encodeURIComponent(
+                companyName
+            )} ${encodeURIComponent(location)}`
         );
-        await driver.sleep(3000);
 
         try {
-            await driver.wait(
-                until.elementLocated(By.xpath("//h1[@class='DUwDvf lfPIob']")),
-                10000
-            );
+            await page.waitForSelector("h1.DUwDvf.lfPIob", { timeout: 15000 });
         } catch {
-            const firstResult = await driver.findElement(
-                By.xpath("(//a[contains(@href, '/place/')])[1]")
-            );
-            await firstResult.click();
-            await driver.wait(
-                until.elementLocated(By.xpath("//h1[@class='DUwDvf lfPIob']")),
-                10000
-            );
+            try {
+                await page.waitForSelector("a[href*='/place/']", { timeout: 15000 });
+                await page.click("a[href*='/place/']");
+                await page.waitForSelector("h1.DUwDvf.lfPIob", { timeout: 15000 });
+            } catch {
+                throw new Error('No results found');
+            }
         }
 
-        data.company = await driver
-            .findElement(By.xpath("//h1[@class='DUwDvf lfPIob']"))
-            .getText();
+        const name = await page.$eval("h1.DUwDvf.lfPIob", el => el.textContent).catch(() => companyName);
+        const address = await page.$eval("div.Io6YTe.fontBodyMedium", el => el.textContent).catch(() => 'N/A');
+        const website = await page.$eval("a[aria-label*='Website']", el => el.href).catch(() => 'N/A');
+        const phone = await page.$eval("div.Io6YTe:has-text(/^0/)", el => el.textContent).catch(() => 'N/A');
 
-        try {
-            data.address = await driver
-                .findElement(
-                    By.xpath(
-                        "//div[contains(@class,'Io6YTe') and contains(@class, 'fontBodyMedium')]"
-                    )
-                )
-                .getText();
-        } catch {}
-        try {
-            data.website = await driver
-                .findElement(By.xpath("//a[contains(@aria-label, 'Website')]"))
-                .getAttribute('href');
-        } catch {}
-        try {
-            data.phone = await driver
-                .findElement(
-                    By.xpath(
-                        "//div[starts-with(text(), '0') and contains(@class, 'Io6YTe')]"
-                    )
-                )
-                .getText();
-        } catch {}
+        return {
+            Company_Name: name || companyName,
+            Address: address,
+            Phone: phone,
+            Website: website,
+        };
     } catch (e) {
-        console.log(`[Maps] Error: ${company} | ${e}`);
+        console.log(`[Maps] Error for ${companyName}: ${e}`);
+        return {
+            Company_Name: companyName,
+            Address: 'N/A',
+            Phone: 'N/A',
+            Website: 'N/A',
+        };
     } finally {
-        let tabs = await driver.getAllWindowHandles();
-        if (tabs.length > 1) {
-            await driver.close();
-            await driver.switchTo().window(tabs[0]);
-        }
+        if (page) await page.close();
     }
-    return data;
 }
 
 export async function main() {
