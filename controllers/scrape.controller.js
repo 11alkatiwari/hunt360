@@ -6,20 +6,28 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export const scrape = (req, res) => {
-    const { industry, state, website } = req.body;
+    const { industry, city, website } = req.body;
+    console.log("REQ BODY:", req.body);
+    console.log("REQ HEADERS:", req.headers);
 
-    if (!industry || !state || !website) {
+    // Trim the values to remove any leading/trailing spaces
+    const trimmedIndustry = industry?.trim();
+    const trimmedCity = city?.trim();
+    const trimmedWebsite = website?.trim();
+
+    console.log("Trimmed values:", { trimmedIndustry, trimmedCity, trimmedWebsite });
+
+    if (!trimmedIndustry || !trimmedCity || !trimmedWebsite) {
         return res
             .status(400)
-            .json({ error: 'Industry, state, and website are required.' });
+            .json({ error: `Industry, city, and website are required and cannot be empty. Received: ${JSON.stringify(req.body)}` });
     }
-
     console.log(
-        `Scraping started for industry: ${industry}, state: ${state}, website: ${website}`
+        `Scraping started for industry: ${trimmedIndustry}, city: ${trimmedCity}, website: ${trimmedWebsite}`
     );
 
     let scriptPath;
-    switch (website) {
+    switch (trimmedWebsite) {
         case 'naukri':
             scriptPath = path.join(
                 __dirname,
@@ -71,7 +79,7 @@ export const scrape = (req, res) => {
                 .json({ error: 'Unsupported website selected.' });
     }
 
-    const nodeProcess = spawn('node', [scriptPath, industry, state]);
+    const nodeProcess = spawn('node', [scriptPath, trimmedIndustry, trimmedCity]);
     let scrapedData = '';
     let responded = false;
 

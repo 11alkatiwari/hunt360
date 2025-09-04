@@ -6,7 +6,7 @@ const baseURL = 'https://hunt360-3.onrender.com/api/corporate';
 
 const DataScraping = () => {
     const [customIndustry, setCustomIndustry] = useState('');
-    const [customState, setCustomState] = useState('');
+    const [customCity, setCustomCity] = useState('');
     const [selectedWebsite, setSelectedWebsite] = useState('');
     const [scrapedData, setScrapedData] = useState([]);
     const [logs, setLogs] = useState([]);
@@ -40,10 +40,15 @@ const DataScraping = () => {
     ];
 
     const handleScrape = async () => {
-        if (!customState || !customIndustry || !selectedWebsite) {
-            alert('⚠️ Please select a City, Industry and Website.');
-            return;
-        }
+        const trimmedIndustry = customIndustry.trim();
+        const trimmedCity = customCity.trim();
+        const trimmedWebsite = selectedWebsite.trim();
+
+        console.log("Sending payload:", {
+        industry: trimmedIndustry,
+        city: trimmedCity,
+        website: trimmedWebsite,
+    });
 
         setLogs(['⏳ Scraping has started...']);
         setFinalFile('');
@@ -51,9 +56,9 @@ const DataScraping = () => {
 
         try {
             const response = await axios.post(`${baseURL}/scrape`, {
-                industry: customIndustry,
-                state: customState,
-                website: selectedWebsite,
+                industry: trimmedIndustry,
+                city: trimmedCity,
+                website: trimmedWebsite,
             });
 
             if (response.data.error) throw new Error(response.data.error);
@@ -65,7 +70,7 @@ const DataScraping = () => {
             ]);
             if (response.data.fileName) setFinalFile(response.data.fileName);
         } catch (error) {
-            console.error('❌ Scraping Error:', error.message);
+            console.error('❌ Scraping Error:', error.response?.data?.error || error.message);
             setLogs((prevLogs) => [
                 ...prevLogs,
                 '❌ Error occurred while scraping.',
@@ -121,8 +126,8 @@ const DataScraping = () => {
                     </label>
                     <input
                         type="text"
-                        value={customState}
-                        onChange={(e) => setCustomState(e.target.value)}
+                        value={customCity}
+                        onChange={(e) => setCustomCity(e.target.value)}
                         placeholder="Enter City"
                         className="w-full py-2 sm:py-3 px-3 sm:px-4 border border-[#d3cce3] rounded-md mb-3 sm:mb-4 focus:outline-none focus:ring-2 focus:ring-[#6a0dad] text-base sm:text-lg placeholder:text-base sm:placeholder:text-lg"
                     />
