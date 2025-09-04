@@ -269,10 +269,11 @@ async function getGSTNumbers(driver, companyName) {
 import fs from 'fs';
 import path from 'path';
 // import readlineSync from 'readline-sync';  // Uncomment if needed
-import { Builder, By, until } from 'selenium-webdriver';
+import { By, until } from 'selenium-webdriver';
 import xlsx from 'xlsx';
 import mysql from 'mysql2/promise';
 import { fileURLToPath } from 'url';
+import createDriver from './setup-chromedriver.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -539,7 +540,7 @@ async function getGSTNumbers(driver, companyName) {
 
 // --- Main Scraping ---
 (async () => {
-    const driver = await new Builder().forBrowser('chrome').build();
+    const driver = await createDriver();
     process.on('SIGINT', async () => {
         console.log('\n Interrupted. Saving data and quitting...');
         saveToExcel();

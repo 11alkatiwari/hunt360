@@ -4,6 +4,8 @@ import path from 'path';
 import xlsx from 'xlsx';
 import mysql from 'mysql2/promise';
 import { fileURLToPath } from 'url';
+import createDriver from './setup-chromedriver.js';
+import { By, until, Key } from 'selenium-webdriver';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -202,35 +204,8 @@ async function getGoogleMapsData(browser, companyName, location) {
 }
 
 export async function main() {
-    const chromeService = new chrome.ServiceBuilder('/usr/bin/chromedriver');
-
-    // Create a unique user data directory
-    const uniqueUserDataDir = path.join(
-        __dirname,
-        `chrome-profile-${Date.now()}-${process.pid}`
-    );
-    if (!fs.existsSync(uniqueUserDataDir)) {
-        fs.mkdirSync(uniqueUserDataDir, { recursive: true });
-    }
-
-    // Configure Chrome options
-    const chromeOptions = new chrome.Options();
-    chromeOptions.setChromeBinaryPath('/usr/bin/chromium-browser');
-    chromeOptions.addArguments(`--user-data-dir=${uniqueUserDataDir}`);
-    chromeOptions.addArguments('--no-sandbox'); // For containerized environments
-    chromeOptions.addArguments('--disable-dev-shm-usage'); // Avoid resource issues
-    chromeOptions.addArguments('--headless=new'); // Run in headless mode to reduce conflicts
-    chromeOptions.addArguments('--disable-gpu'); // Disable GPU for headless
-    chromeOptions.addArguments('--disable-extensions'); // Disable extensions to avoid conflicts
-    chromeOptions.addArguments('--disable-cache'); // Prevent cache-related issues
-    chromeOptions.addArguments('--window-size=1920,1080'); // Set window size for consistency
-
-    // Initialize WebDriver with Chrome options
-    const driver = await new Builder()
-        .forBrowser('chrome')
-        .setChromeOptions(chromeOptions)
-        .setChromeService(chromeService)
-        .build();
+    // Initialize WebDriver using the centralized createDriver function
+    const driver = await createDriver();
 
     let gstTracker = {};
 

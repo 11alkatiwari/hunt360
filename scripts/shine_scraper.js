@@ -1,10 +1,10 @@
-import { Builder, By } from 'selenium-webdriver';
-import chrome from 'selenium-webdriver/chrome.js';
+import { By } from 'selenium-webdriver';
 import fs from 'fs-extra';
 import path from 'path';
 import xlsx from 'xlsx';
 import mysql from 'mysql2/promise'; // async/await support
 import { fileURLToPath } from 'url';
+import createDriver from './setup-chromedriver.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -132,10 +132,7 @@ async function getGSTNumber(driver, companyName) {
 
 // === Main Scraper ===
 (async function main() {
-    const driver = await new Builder()
-        .forBrowser('chrome')
-        .setChromeOptions(new chrome.Options().addArguments('--incognito', '--start-maximized'))
-        .build();
+    const driver = await createDriver();
 
     let collectedData = [];
 

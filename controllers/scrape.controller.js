@@ -84,6 +84,8 @@ export const scrape = (req, res) => {
     let errorData = '';
     let responded = false;
 
+    console.log(`Launching scraper script: ${scriptPath} with industry=${trimmedIndustry} city=${trimmedCity}`);
+
     // Set a timeout for the process
     const timeout = setTimeout(() => {
         if (!responded) {
