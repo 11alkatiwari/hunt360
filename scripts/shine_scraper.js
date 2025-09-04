@@ -1,5 +1,5 @@
 import { Builder, By, until } from 'selenium-webdriver';
-import chrome from 'selenium-webdriver/chrome';
+import chrome from 'selenium-webdriver/chrome.js';
 import fs from 'fs-extra';
 import path from 'path';
 import xlsx from 'xlsx';
