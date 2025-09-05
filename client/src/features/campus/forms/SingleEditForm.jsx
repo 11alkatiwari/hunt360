@@ -182,16 +182,16 @@ const SingleEditForm = ({
                     </div>
 
                     <div>
-                        <label htmlFor="Annual_fees" className={labelClass}>
+                        <label htmlFor="Anual_fees" className={labelClass}>
                             Annual Fees
                         </label>
                         <input
-                            id="Annual_fees"
-                            name="Annual_fees"
+                            id="Anual_fees"
+                            name="Anual_fees"
                             type="text"
                             placeholder="Enter annual fees"
                             className={inputClass}
-                            value={updatedData.Annual_fees || ''} // Fixed typo: Anual_fees → Annual_fees
+                            value={updatedData.Anual_fees || ''} // Fixed typo: Anual_fees → Annual_fees
                             onChange={handleChange}
                             disabled={isSubmitting}
                         />
