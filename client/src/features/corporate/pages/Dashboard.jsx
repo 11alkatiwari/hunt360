@@ -408,69 +408,54 @@ const Dashboard = () => {
                     <p className="text-2xl font-bold text-gray-800 mb-5">
                         Recent Activities
                     </p>
-                    <Card className="max-h-[300px] overflow-y-auto shadow-md rounded-2xl p-4">
-                        <p className="text-lg font-semibold text-gray-700 mb-4">
-                            Latest Data Scraped
-                        </p>
-                        {error ? (
-                            <p className="text-red-600">{error}</p>
-                        ) : loading ? (
-                            <p className="text-gray-500 text-center">
-                                Loading data...
-                            </p>
-                        ) : rows.length > 0 ? (
-                            <div className="w-full overflow-x-auto">
-                                <table className="min-w-full border border-gray-300 text-sm">
-                                    <thead className="bg-gray-100 sticky top-0 z-10">
-                                        <tr>
-                                            {Object.keys(rows[0]).map(
-                                                (key, i, arr) => (
-                                                    <th
-                                                        key={key}
-                                                        className={`px-2 py-1 text-left text-gray-600 ${
-                                                            i !== arr.length - 1
-                                                                ? 'border-r border-gray-300'
-                                                                : ''
-                                                        }`}
-                                                    >
-                                                        {key}
-                                                    </th>
-                                                )
-                                            )}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {rows.map((row, rowIndex) => (
-                                            <tr
-                                                key={rowIndex}
-                                                className="hover:bg-gray-50"
-                                            >
-                                                {Object.values(row).map(
-                                                    (value, colIndex, arr) => (
-                                                        <td
-                                                            key={colIndex}
-                                                            className={`px-2 py-1 text-gray-700 whitespace-nowrap ${
-                                                                colIndex !==
-                                                                arr.length - 1
-                                                                    ? 'border-r border-gray-200'
-                                                                    : ''
-                                                            }`}
-                                                        >
-                                                            {value}
-                                                        </td>
-                                                    )
-                                                )}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        ) : (
-                            <p className="text-gray-500 text-center">
-                                No data found.
-                            </p>
-                        )}
-                    </Card>
+                   <Card className="shadow-md rounded-2xl p-4">
+                <p className="text-lg font-semibold text-gray-700 mb-4">
+                        Latest Data Scraped
+                    </p>
+                    {error ? (
+                <p className="text-red-600">{error}</p>
+                    ) : loading ? (
+                <p className="text-gray-500 text-center">Loading data...</p>
+                    ) : rows.length > 0 ? (
+                <div className="w-full max-h-[300px] overflow-y-auto overflow-x-auto">
+                <table className="min-w-[900px] border border-gray-300 text-sm">
+                <thead className="bg-gray-100 sticky top-0 z-10">
+                <tr>
+                {Object.keys(rows[0]).map((key, i, arr) => (
+              <th
+                key={key}
+                className={`px-2 py-1 text-left text-gray-600 whitespace-nowrap ${
+                  i !== arr.length - 1 ? "border-r border-gray-300" : ""
+                }`}
+              >
+                {key}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={rowIndex} className="hover:bg-gray-50">
+              {Object.values(row).map((value, colIndex, arr) => (
+                <td
+                  key={colIndex}
+                  className={`px-2 py-1 text-gray-700 whitespace-nowrap ${
+                    colIndex !== arr.length - 1 ? "border-r border-gray-200" : ""
+                  }`}
+                >
+                  {value}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    <p className="text-gray-500 text-center">No data found.</p>
+  )}
+</Card>
+
                 </div>
                 <div className="mt-6 mb-2.5">
                     <h4 className="m-0 text-sm sm:text-base font-semibold text-[#333] tracking-wide pl-3">
