@@ -171,13 +171,13 @@ function Reports() {
                 tableColumnHeaders.forEach((header, index) => {
                     const value = row[header.toLowerCase().replace(' ', '_')] || 'N/A';
                     const textWidth = doc.getTextWidth(value.toString());
-                    maxWidths[header] = Math.max(maxWidths[header], textWidth + 5); // Increased padding to 5mm
+                    maxWidths[header] = Math.max(maxWidths[header], textWidth + 5);
                 });
             });
 
             // Adjust total width to fit page (A4 width is ~190mm with 10mm margins on each side)
             const totalWidth = Object.values(maxWidths).reduce((sum, width) => sum + width, 0);
-            const availableWidth = 190; // 190mm page width - 10mm margins on each side
+            const availableWidth = 190;
             const scaleFactor = totalWidth > availableWidth ? availableWidth / totalWidth : 1;
             const adjustedColumnStyles = tableColumnHeaders.reduce((acc, header, index) => ({
                 ...acc,
@@ -251,7 +251,7 @@ function Reports() {
             doc.addPage();
             const chartWidth = 80;
             const chartHeight = 60;
-            const startX = (doc.internal.pageSize.width - chartWidth * 2 - 10) / 2; // Center with 10mm gap
+            const startX = (doc.internal.pageSize.width - chartWidth * 2 - 10) / 2;
             const startY = 30;
 
             const [leadStatusImg, commStatusImg, cityLeadImg, stateBdImg] = await Promise.all([
@@ -272,7 +272,7 @@ function Reports() {
                 doc.text('Communication Status Overview', startX + chartWidth + 10 + chartWidth / 2, startY - 5, { align: 'center' });
             }
             if (cityLeadImg) {
-                doc.addImage(cityLeadImg, 'PNG', startX, startY + chartHeight + 20, chartWidth, chartHeight); // Below first row
+                doc.addImage(cityLeadImg, 'PNG', startX, startY + chartHeight + 20, chartWidth, chartHeight);
                 doc.setFontSize(14);
                 doc.text('Location-wise Lead Count', startX + chartWidth / 2, startY + chartHeight + 15, { align: 'center' });
             }
@@ -503,7 +503,6 @@ function Reports() {
     return (
         <div className="bg-[#f9f9fc] text-[#1a202c] pt-[50px] p-8 overflow-x-hidden">
             <main className="max-w-[1200px] mx-auto w-full flex flex-col">
-                {/* <h1 className="text-[32px] font-bold pl-[12px]">Reports</h1> */}
                 <h2 className="text-[#4c1d95] mb-4 text-[24px] font-bold pl-[12px]">Reports Overview</h2>
                 <div className="flex justify-start gap-[10px] mb-8 flex-nowrap pl-[12px] overflow-x-auto mt-[16px]">
                     <div className="bg-[#f3e8ff] mt-[16px] border-l-6 border-[#6a0080] rounded-[12px] p-[20px] w-full max-w-[300px] min-w-[250px] shadow-[0_4px_10px_rgba(0,0,0,0.08)] text-left flex flex-col justify-between transition-transform duration-200 hover:-translate-y-[5px] gap-[6px]">
@@ -601,43 +600,6 @@ function Reports() {
                 <div className="flex gap-[10px] mt-[10px] items-center pl-[12px]">
                     <button className="bg-[#6a1b9a] pl-[12px] text-white border-none rounded-lg py-[2px] px-[10px] cursor-pointer font-bold text-sm w-[150px] h-[35px] hover:bg-[#6a1b9a]" onClick={handleSearch}>Search</button>
                     <button className="bg-[#f4f1fa] pl-[12px] text-[black] border border-[#d3cce3] rounded-lg py-1 px-[10px] cursor-pointer font-bold text-sm w-[100px] h-[35px] hover:bg-[#eae4f4]" onClick={handleClear}>Clear</button>
-                </div>
-                <div className="activity-trends-container">
-                    <h3 className="text-[#4c1d95] mb-4 pl-[12px] text-[20px] font-[700] mt-[12px]">Activity Trends</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-white rounded-xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] overflow-x-hidden">
-                        <div className="bg-white p-[15px] rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative min-w-[320px]">
-                            <h4 className="text-lg font-semibold mb-2 text-[#4c1d95]">Lead Status Distribution</h4>
-                            <canvas
-                                className="max-w-full h-[300px]"
-                                id="leadStatusChart"
-                                ref={leadStatusChartRef}
-                            ></canvas>
-                        </div>
-                        <div className="bg-white p-[15px] rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative min-w-[320px] flex flex-col items-center justify-center h-[350px]">
-                            <h4 className="text-lg font-semibold mb-2 text-[#4c1d95]">Communication Status Overview</h4>
-                            <canvas
-                                className="w-[300px] h-[300px]"
-                                id="communicationStatusChart"
-                                ref={communicationStatusChartRef}
-                            ></canvas>
-                        </div>
-                        <div className="bg-white p-[15px] rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative min-w-[320px]">
-                            <h4 className="text-lg font-semibold mb-2 text-[#4c1d95]">Location-wise Lead Count</h4>
-                            <canvas
-                                className="max-w-full h-[300px]"
-                                id="cityLeadChart"
-                                ref={cityLeadChartRef}
-                            ></canvas>
-                        </div>
-                        <div className="bg-white p-[15px] rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative min-w-[320px]">
-                            <h4 className="text-lg font-semibold mb-2 text-[#4c1d95]">State-wise BD Activities</h4>
-                            <canvas
-                                className="max-w-full h-[300px]"
-                                id="stateBdChart"
-                                ref={stateBdChartRef}
-                            ></canvas>
-                        </div>
-                    </div>
                 </div>
                 <div>
                     <h3 className="text-[#4c1d95] mb-4 pl-[12px] font-[700] mt-[16px]" style={{ wordSpacing: '0.2rem' }}>
@@ -763,6 +725,43 @@ function Reports() {
                     >
                         Next
                     </button>
+                </div>
+                <div className="activity-trends-container">
+                    <h3 className="text-[#4c1d95] mb-4 pl-[12px] text-[20px] font-[700] mt-[12px]">Activity Trends</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-white rounded-xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.1)] overflow-x-hidden">
+                        <div className="bg-white p-[15px] rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative min-w-[320px]">
+                            <h4 className="text-lg font-semibold mb-2 text-[#4c1d95]">Lead Status Distribution</h4>
+                            <canvas
+                                className="max-w-full h-[300px]"
+                                id="leadStatusChart"
+                                ref={leadStatusChartRef}
+                            ></canvas>
+                        </div>
+                        <div className="bg-white p-[15px] rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative min-w-[320px] flex flex-col items-center justify-center h-[350px]">
+                            <h4 className="text-lg font-semibold mb-2 text-[#4c1d95]">Communication Status Overview</h4>
+                            <canvas
+                                className="w-[300px] h-[300px]"
+                                id="communicationStatusChart"
+                                ref={communicationStatusChartRef}
+                            ></canvas>
+                        </div>
+                        <div className="bg-white p-[15px] rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative min-w-[320px]">
+                            <h4 className="text-lg font-semibold mb-2 text-[#4c1d95]">Location-wise Lead Count</h4>
+                            <canvas
+                                className="max-w-full h-[300px]"
+                                id="cityLeadChart"
+                                ref={cityLeadChartRef}
+                            ></canvas>
+                        </div>
+                        <div className="bg-white p-[15px] rounded-[10px] shadow-[0_2px_8px_rgba(0,0,0,0.08)] relative min-w-[320px]">
+                            <h4 className="text-lg font-semibold mb-2 text-[#4c1d95]">State-wise BD Activities</h4>
+                            <canvas
+                                className="max-w-full h-[300px]"
+                                id="stateBdChart"
+                                ref={stateBdChartRef}
+                            ></canvas>
+                        </div>
+                    </div>
                 </div>
                 <div className="mt-4 pl-[16px] flex justify-center gap-4">
                     <button
