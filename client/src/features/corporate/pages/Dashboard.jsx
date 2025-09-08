@@ -40,6 +40,7 @@ const Dashboard = () => {
     const [rows, setRows] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const navigate = useNavigate();
 
@@ -96,7 +97,11 @@ const Dashboard = () => {
 
     const filteredSectors = analytics.sectors.filter((item) => item.count > 0);
     const filteredStatus = analytics.status.filter((item) => item.count > 0);
-
+    const filteredRows = rows.filter((row) =>
+        row.company?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.jobTitle?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        row.location?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     const sectorData = {
         labels: filteredSectors.map((item) => item.sectors),
         datasets: [
@@ -404,10 +409,11 @@ const Dashboard = () => {
                     </div>
                 </div>
                         {/* Recent Activities Section */}
-                <div className="mt-5">
+                {/* <div className="mt-5">
                     <p className="text-2xl font-bold text-gray-800 mb-5">
                         Recent Activities
                     </p>
+                    
                    <Card className="shadow-md rounded-2xl p-4">
                 <p className="text-lg font-semibold text-gray-700 mb-4">
                         Latest Data Scraped
@@ -454,7 +460,63 @@ const Dashboard = () => {
   ) : (
     <p className="text-gray-500 text-center">No data found.</p>
   )}
-</Card>
+</Card> */}
+
+<div className="mt-5">
+                    <p className="text-2xl font-bold text-gray-800 mb-5">
+                        Recent Activities
+                    </p>
+<div className="p-6">
+            {/* Latest Data Scraped */}
+            <div className="bg-white shadow-md rounded-lg p-6 mb-6">
+                <h2 className="text-lg font-semibold mb-4">Latest Data Scraped</h2>
+
+                {/* Search Input */}
+                <input
+                    type="text"
+                    placeholder="Search by company, job title, or location..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="mb-4 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                />
+
+                {/* Table */}
+               <div className="overflow-x-auto">
+  <table className="w-full text-sm text-left border-collapse">
+    <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+      <tr>
+        {filteredRows.length > 0 &&
+          Object.keys(filteredRows[0]).map((key) => (
+            <th key={key} className="px-4 py-2">
+              {key}
+            </th>
+          ))}
+      </tr>
+    </thead>
+    <tbody>
+      {filteredRows.length > 0 ? (
+        filteredRows.map((row, index) => (
+          <tr key={index} className="border-b hover:bg-gray-50">
+            {Object.values(row).map((value, i) => (
+              <td key={i} className="px-4 py-2">
+                {value}
+              </td>
+            ))}
+          </tr>
+        ))
+      ) : (
+        <tr>
+          <td
+            colSpan={filteredRows.length > 0 ? Object.keys(filteredRows[0]).length : 1}
+            className="px-4 py-4 text-center text-gray-500"
+          >
+            No matching results found.
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
 
                 </div>
                 <div className="mt-6 mb-2.5">
@@ -628,6 +690,8 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
+            </div>
+        </div>
         </div>
     );
 };
