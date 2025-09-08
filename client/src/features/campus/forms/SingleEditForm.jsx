@@ -492,7 +492,7 @@ SingleEditForm.propTypes = {
         College_Name: PropTypes.string,
         District: PropTypes.string,
         State: PropTypes.string,
-        Annual_fees: PropTypes.string,
+        Anual_fees: PropTypes.string,
         Placement_fees: PropTypes.string,
         Ranking: PropTypes.string,
         Course: PropTypes.string,
