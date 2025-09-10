@@ -17,7 +17,7 @@
 const isProduction = process.env.NODE_ENV === "PRODUCTION";
 
 const SERVER_URL = isProduction
-  ? process.env.SERVER_URL || "https://hunt360.onrender.com"
+  ? process.env.SERVER_URL || "https://hunt360-3.onrender.com"
   : "http://localhost:8080"; // 👈 match your Express server port
 
 if (isProduction) {

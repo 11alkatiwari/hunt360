@@ -1,6 +1,7 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { spawn } from 'child_process';
+import db from '../config/database.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -140,9 +141,38 @@ export const scrape = (req, res) => {
             })
             .filter(Boolean);
 
+        // Save to database
+        try {
+            const insertQuery = `
+                INSERT INTO scraped_data (
+                    job_title, company_name, location, address, phone_number, website_link, gst_number, updated, created_at, updated_at
+                ) VALUES ?
+            `;
+            const values = rows.map(([job_title, company_name, location, address, phone, website, gst_number]) => [
+                job_title || null,
+                company_name || null,
+                location || null,
+                address || null,
+                phone || null,
+                website || null,
+                gst_number || null,
+                'no',
+                new Date(),
+                new Date()
+            ]);
+
+            if (values.length > 0) {
+                const [result] = await db.query(insertQuery, [values]);
+                console.log(`Saved ${result.affectedRows} records to database.`);
+            }
+        } catch (dbError) {
+            console.error('Database save error:', dbError);
+            // Continue with response even if save fails
+        }
+
         responded = true;
         res.json({
-            message: `Scraping completed and ${rows.length} records saved.`,
+            message: `Scraping completed and ${rows.length} records processed.`,
             data: rows.map(
                 ([
                     job_title,
@@ -154,7 +184,7 @@ export const scrape = (req, res) => {
                     gst_number,
                 ]) => ({
                     job_title,
-                    company,
+                    company_name: company,
                     location,
                     address,
                     phone,

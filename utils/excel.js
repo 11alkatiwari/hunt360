@@ -19,8 +19,8 @@ export async function saveDataToExcel(data, industry, city) {
     }
 
     const headers = [
-        'Job_Title',
-        'Company_Name',
+        'job_title',
+        'company_Name',
         'Location',
         'Address',
         'Phone',
@@ -28,8 +28,8 @@ export async function saveDataToExcel(data, industry, city) {
         'GST Number(s)',
     ];
     const rows = data.map((d) => [
-        d.Job_Title,
-        d.Company_Name,
+        d.job_Title,
+        d.company_name,
         d.Location,
         d.Address,
         d.Phone,

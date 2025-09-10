@@ -5,62 +5,98 @@ import db from '../config/database.js';
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+// Middleware array for uploadFile
 export const uploadFile = [
   upload.single('file'),
   async (req, res) => {
     if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      return res.status(400).json({ error: 'No file uploaded' });
     }
 
-        try {
+    try {
+      // Read the Excel file from memory buffer
       const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
       const sheetName = workbook.SheetNames[0];
       const sheetData = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
 
       if (sheetData.length === 0) {
-        return res.status(400).json({ message: "Empty file uploaded" });
+        return res.status(400).json({ message: 'Empty file uploaded' });
       }
 
-const insertQuery = `
+      // Log raw data for debugging
+      console.log('Raw sheet data:', JSON.stringify(sheetData, null, 2));
+
+      // Log column names for debugging
+      if (sheetData.length > 0) {
+        console.log('Excel column names:', Object.keys(sheetData[0]));
+      }
+
+      // Normalize and map data
+      const normalizedData = sheetData.map(row => {
+        const normalizedRow = {
+          company_name: row['Company Name'] || row['company_name'] || row['Company'] || null,
+          location: row['Location'] || row['location'] || row['City'] || null,
+          address: row['Address'] || row['address'] || null,
+          phone_number: row['Phone'] || row['Phone Number'] || row['phone_number'] || row['phone'] || null,
+          website_link: row['Website'] || row['Website Link'] || row['website_link'] || row['website'] || null,
+          job_title: row['Job Title'] || row['job_title'] || row['Job_Title'] || null,
+          gst_number: row['GST Number(s)'] || row['GST'] || row['gst_number'] || row['gst'] || null,
+          post_date: row['Post Date'] || row['post_date'] || row['Date'] || row['date'] || null,
+        };
+
+        // Log each row's mapping for debugging
+        console.log('Mapped row:', normalizedRow);
+
+        // Parse date if present
+        if (normalizedRow.post_date) {
+          const parsedDate = new Date(normalizedRow.post_date);
+          normalizedRow.post_date = isNaN(parsedDate.getTime()) ? null : parsedDate.toISOString().split('T')[0];
+        }
+
+        return normalizedRow;
+      });
+
+      // Log normalized data before insertion
+      console.log('Normalized data to insert:', JSON.stringify(normalizedData, null, 2));
+
+      // Prepare values for bulk insert
+      const values = normalizedData.map(row => [
+        row.company_name,
+        row.location,
+        row.address,
+        row.phone_number,
+        row.website_link,
+        row.job_title,
+        row.gst_number,
+        row.post_date,
+      ]);
+
+      // Insert into database
+      const insertQuery = `
         INSERT INTO scraped_data (
           company_name, location, address, phone_number, website_link, job_title, gst_number, post_date
         ) VALUES ?
       `;
+      const [result] = await db.query(insertQuery, [values]);
 
-      const parseDate = (dateStr) => {
-        if (!dateStr || dateStr === "") return null;
-        const date = new Date(dateStr);
-        return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
-      };
-
-      const values = sheetData.map((row) => [
-        row["Company_Name"] || null,
-        row.Location ? row.Location.split(",")[0].trim() : null,
-        row["Address"] || null,
-        row["Phone"] || null,
-        row["Website"] || null,
-        row["Job_Title"] || null,
-        row["GST Number(s)"] ? row["GST Number(s)"].split(",")[0].trim() : null,
-        parseDate(row["Post Date"]),
-      ]);
-
-
-            const [result] = await db.query(insertQuery, [values]);
-      return res.json({
+      // Send success response with detected columns
+      res.json({
         message: `Uploaded ${result.affectedRows} records successfully`,
-      }); } catch (error) {
-      console.error("Error processing file:", error);
-      console.error("Error details:", {
+        detectedColumns: Object.keys(sheetData[0]),
+      });
+    } catch (error) {
+      console.error('Error processing file:', error);
+      console.error('Error details:', {
         message: error.message,
         stack: error.stack,
         code: error.code,
         errno: error.errno,
         sqlState: error.sqlState,
-        sqlMessage: error.sqlMessage
+        sqlMessage: error.sqlMessage,
       });
-      return res.status(500).json({ message: "Failed to process the uploaded file", error: error.message });
+      return res.status(500).json({ message: 'Failed to process the uploaded file', error: error.message });
     }
-    },
+  },
 ];
 
 export const cleanDuplicates = async (req, res) => {
